@@ -1,4 +1,5 @@
-# IAM Service
+# Citadelium Identity and Access Management Service
 
-This project contains codes for Identity and Access Management
-services.
+Citadelium IAM is a service module which provides identity and access
+management either as separate service (following microservice paradigm) or as
+a library for monolithic service application.
