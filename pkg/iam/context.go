@@ -3,8 +3,8 @@ package iam
 import (
 	"context"
 
-	"github.com/citadelium/pkg/api"
-	accesserrs "github.com/citadelium/pkg/errors/access"
+	"github.com/citadelium/foundation/pkg/api"
+	accesserrs "github.com/citadelium/foundation/pkg/errors/access"
 )
 
 var (

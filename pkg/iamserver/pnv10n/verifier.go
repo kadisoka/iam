@@ -11,7 +11,7 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/citadelium/pkg/errors"
+	"github.com/citadelium/foundation/pkg/errors"
 	"github.com/jmoiron/sqlx"
 	"golang.org/x/text/language"
 

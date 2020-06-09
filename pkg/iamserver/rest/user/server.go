@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	oidc "github.com/citadelium/pkg/api/openid/connect"
-	"github.com/citadelium/pkg/api/rest"
+	oidc "github.com/citadelium/foundation/pkg/api/openid/connect"
+	"github.com/citadelium/foundation/pkg/api/rest"
 	"github.com/emicklei/go-restful"
 	restfulspec "github.com/emicklei/go-restful-openapi"
 

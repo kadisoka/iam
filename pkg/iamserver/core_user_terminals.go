@@ -1,7 +1,7 @@
 package iamserver
 
 import (
-	"github.com/citadelium/pkg/errors"
+	"github.com/citadelium/foundation/pkg/errors"
 	"github.com/jmoiron/sqlx"
 
 	"github.com/citadelium/iam/pkg/iam"

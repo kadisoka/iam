@@ -5,7 +5,7 @@ TESTER_IMAGE ?= citadel-tester
 GOLANG_IMAGE ?= golang:1.14
 POSTGRES_IMAGE ?= postgres:10.7-alpine
 
-.PHONY: run fmt integration-test lint test deps-up \
+.PHONY: run fmt lint test deps-up \
 	_init_iam_db
 
 run:
@@ -18,10 +18,6 @@ fmt:
 		--entrypoint gofmt \
 		$(GOLANG_IMAGE) -w -l -s \
 		./pkg ./iam-server
-
-integration-test:
-	@echo "Running integration tests ..."
-	./tests/integration/run.sh
 
 lint:
 	@echo "Preparing linter..."

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/citadelium/pkg/errors"
+	"github.com/citadelium/foundation/pkg/errors"
 	"github.com/richardlehane/crock32"
 )
 

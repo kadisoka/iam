@@ -3,8 +3,8 @@ package iam
 import (
 	"time"
 
-	"github.com/citadelium/pkg/errors"
-	dataerrs "github.com/citadelium/pkg/errors/data"
+	"github.com/citadelium/foundation/pkg/errors"
+	dataerrs "github.com/citadelium/foundation/pkg/errors/data"
 	"github.com/dgrijalva/jwt-go"
 )
 

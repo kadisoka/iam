@@ -3,7 +3,7 @@ package pnv10n
 import (
 	"time"
 
-	"github.com/citadelium/pkg/errors"
+	"github.com/citadelium/foundation/pkg/errors"
 	"github.com/rez-go/stev"
 )
 

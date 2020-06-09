@@ -1,7 +1,7 @@
 package logging
 
 import (
-	citadellog "github.com/citadelium/pkg/logging"
+	citadellog "github.com/citadelium/foundation/pkg/logging"
 
 	"github.com/citadelium/iam/pkg/iam"
 )

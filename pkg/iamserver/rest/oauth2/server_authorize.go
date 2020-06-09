@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/citadelium/pkg/api/oauth2"
-	"github.com/citadelium/pkg/api/rest"
+	"github.com/citadelium/foundation/pkg/api/oauth2"
+	"github.com/citadelium/foundation/pkg/api/rest"
 	"github.com/emicklei/go-restful"
 	"github.com/tomasen/realip"
 	"golang.org/x/text/language"

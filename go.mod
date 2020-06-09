@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/aws/aws-sdk-go v1.31.13
-	github.com/citadelium/pkg v0.0.0-20200609060552-0c1bb550ac12
+	github.com/citadelium/foundation v0.0.0-20200609143229-b8ffe22c7af9
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/emicklei/go-restful v2.12.0+incompatible
 	github.com/emicklei/go-restful-openapi v1.3.0
@@ -15,7 +15,6 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/jmoiron/sqlx v1.2.0
-	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/lib/pq v1.7.0
 	github.com/mailru/easyjson v0.7.1 // indirect
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect

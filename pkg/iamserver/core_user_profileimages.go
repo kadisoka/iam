@@ -4,8 +4,8 @@ import (
 	"io"
 	"path"
 
-	"github.com/citadelium/pkg/errors"
-	"github.com/citadelium/pkg/media"
+	"github.com/citadelium/foundation/pkg/errors"
+	"github.com/citadelium/foundation/pkg/media"
 	mediapb "github.com/rez-go/crux-apis/crux/media/v1"
 
 	"github.com/citadelium/iam/pkg/iam"

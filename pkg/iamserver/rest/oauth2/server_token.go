@@ -5,7 +5,7 @@ package oauth2
 import (
 	"net/http"
 
-	"github.com/citadelium/pkg/api/oauth2"
+	"github.com/citadelium/foundation/pkg/api/oauth2"
 	"github.com/emicklei/go-restful"
 )
 

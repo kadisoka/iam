@@ -3,8 +3,8 @@ package logging
 import (
 	"net/http"
 
-	"github.com/citadelium/pkg/api/rest"
-	citadellog "github.com/citadelium/pkg/logging"
+	"github.com/citadelium/foundation/pkg/api/rest"
+	citadellog "github.com/citadelium/foundation/pkg/logging"
 	"github.com/tomasen/realip"
 
 	"github.com/citadelium/iam/pkg/iam"

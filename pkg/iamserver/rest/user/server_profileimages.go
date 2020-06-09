@@ -3,8 +3,8 @@ package user
 import (
 	"net/http"
 
-	"github.com/citadelium/pkg/api/rest"
-	"github.com/citadelium/pkg/errors"
+	"github.com/citadelium/foundation/pkg/api/rest"
+	"github.com/citadelium/foundation/pkg/errors"
 	"github.com/emicklei/go-restful"
 )
 

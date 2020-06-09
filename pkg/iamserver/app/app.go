@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/citadelium/pkg/app"
-	"github.com/citadelium/pkg/errors"
-	"github.com/citadelium/pkg/webui"
+	"github.com/citadelium/foundation/pkg/app"
+	"github.com/citadelium/foundation/pkg/errors"
+	"github.com/citadelium/foundation/pkg/webui"
 	"github.com/rez-go/stev"
 
 	"github.com/citadelium/iam/pkg/iam/logging"

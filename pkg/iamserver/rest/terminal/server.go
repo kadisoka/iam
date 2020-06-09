@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/citadelium/pkg/api/rest"
-	"github.com/citadelium/pkg/errors"
+	"github.com/citadelium/foundation/pkg/api/rest"
+	"github.com/citadelium/foundation/pkg/errors"
 	"github.com/emicklei/go-restful"
 	restfulspec "github.com/emicklei/go-restful-openapi"
 	"github.com/tomasen/realip"

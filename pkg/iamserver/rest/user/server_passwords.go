@@ -3,7 +3,7 @@ package user
 import (
 	"net/http"
 
-	"github.com/citadelium/pkg/api/rest"
+	"github.com/citadelium/foundation/pkg/api/rest"
 	"github.com/emicklei/go-restful"
 )
 

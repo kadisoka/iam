@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/citadelium/pkg/api"
-	"github.com/citadelium/pkg/errors"
-	dataerrs "github.com/citadelium/pkg/errors/data"
+	"github.com/citadelium/foundation/pkg/api"
+	"github.com/citadelium/foundation/pkg/errors"
+	dataerrs "github.com/citadelium/foundation/pkg/errors/data"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 	grpcmd "google.golang.org/grpc/metadata"

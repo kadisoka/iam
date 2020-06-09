@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/citadelium/pkg/errors"
+	"github.com/citadelium/foundation/pkg/errors"
 	"golang.org/x/text/language"
 
 	"github.com/citadelium/iam/pkg/iam"

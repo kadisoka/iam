@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/citadelium/pkg/errors"
+	"github.com/citadelium/foundation/pkg/errors"
 	"github.com/lib/pq"
 
 	"github.com/citadelium/iam/pkg/iam"

@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/citadelium/pkg/app"
-	"github.com/citadelium/pkg/errors"
-	mediastore "github.com/citadelium/pkg/media/store"
+	"github.com/citadelium/foundation/pkg/app"
+	"github.com/citadelium/foundation/pkg/errors"
+	mediastore "github.com/citadelium/foundation/pkg/media/store"
 	"github.com/hashicorp/golang-lru"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -26,8 +26,8 @@ import (
 	_ "github.com/citadelium/iam/pkg/iamserver/pnv10n/twilio"
 
 	// Media object storage modules
-	_ "github.com/citadelium/pkg/media/store/minio"
-	_ "github.com/citadelium/pkg/media/store/s3"
+	_ "github.com/citadelium/foundation/pkg/media/store/minio"
+	_ "github.com/citadelium/foundation/pkg/media/store/s3"
 )
 
 const secretFilesDir = "/run/secrets"

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/citadelium/pkg/errors"
+	"github.com/citadelium/foundation/pkg/errors"
 	"github.com/jmoiron/sqlx"
 	iampb "github.com/rez-go/crux-apis/crux/iam/v1"
 	"golang.org/x/crypto/blake2b"

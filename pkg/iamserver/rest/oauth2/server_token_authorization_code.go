@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/citadelium/pkg/api/oauth2"
-	"github.com/citadelium/pkg/errors"
+	"github.com/citadelium/foundation/pkg/api/oauth2"
+	"github.com/citadelium/foundation/pkg/errors"
 	"github.com/emicklei/go-restful"
 
 	"github.com/citadelium/iam/pkg/iam"

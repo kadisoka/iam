@@ -3,8 +3,8 @@ package grpc
 import (
 	"context"
 
-	grpcerrs "github.com/citadelium/pkg/api/grpc/errors"
-	"github.com/citadelium/pkg/errors"
+	grpcerrs "github.com/citadelium/foundation/pkg/api/grpc/errors"
+	"github.com/citadelium/foundation/pkg/errors"
 	pbtypes "github.com/gogo/protobuf/types"
 	iampb "github.com/rez-go/crux-apis/crux/iam/v1"
 	"golang.org/x/text/language"

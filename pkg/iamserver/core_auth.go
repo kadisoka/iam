@@ -4,8 +4,8 @@ import (
 	"crypto/rand"
 	"time"
 
-	apperrs "github.com/citadelium/pkg/app/errors"
-	"github.com/citadelium/pkg/errors"
+	apperrs "github.com/citadelium/foundation/pkg/app/errors"
+	"github.com/citadelium/foundation/pkg/errors"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/lib/pq"
 

@@ -3,7 +3,7 @@ package iam
 import (
 	"net/http"
 
-	"github.com/citadelium/pkg/api/rest"
+	"github.com/citadelium/foundation/pkg/api/rest"
 )
 
 // RESTServiceClient is the interface specialized for REST.

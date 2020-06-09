@@ -3,7 +3,7 @@ package iam
 import (
 	"time"
 
-	"github.com/citadelium/pkg/errors"
+	"github.com/citadelium/foundation/pkg/errors"
 	"golang.org/x/text/language"
 )
 

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/citadelium/pkg/app"
-	"github.com/citadelium/pkg/webui"
+	"github.com/citadelium/foundation/pkg/app"
+	"github.com/citadelium/foundation/pkg/webui"
 	_ "github.com/lib/pq"
 
 	"github.com/citadelium/iam/pkg/iam/logging"

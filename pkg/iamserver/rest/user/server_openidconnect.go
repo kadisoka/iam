@@ -3,8 +3,8 @@ package user
 import (
 	"net/http"
 
-	oidc "github.com/citadelium/pkg/api/openid/connect"
-	"github.com/citadelium/pkg/api/rest"
+	oidc "github.com/citadelium/foundation/pkg/api/openid/connect"
+	"github.com/citadelium/foundation/pkg/api/rest"
 	"github.com/emicklei/go-restful"
 
 	"github.com/citadelium/iam/pkg/iam"

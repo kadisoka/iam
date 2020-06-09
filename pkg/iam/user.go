@@ -1,7 +1,7 @@
 package iam
 
 import (
-	"github.com/citadelium/pkg/errors"
+	"github.com/citadelium/foundation/pkg/errors"
 )
 
 type UserService interface {

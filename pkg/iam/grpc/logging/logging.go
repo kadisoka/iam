@@ -1,8 +1,8 @@
 package logging
 
 import (
-	"github.com/citadelium/pkg/api"
-	citadellog "github.com/citadelium/pkg/logging"
+	"github.com/citadelium/foundation/pkg/api"
+	citadellog "github.com/citadelium/foundation/pkg/logging"
 	"google.golang.org/grpc"
 	grpcPeer "google.golang.org/grpc/peer"
 

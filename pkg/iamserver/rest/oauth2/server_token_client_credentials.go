@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/citadelium/pkg/api/oauth2"
+	"github.com/citadelium/foundation/pkg/api/oauth2"
 	"github.com/emicklei/go-restful"
 	"github.com/tomasen/realip"
 

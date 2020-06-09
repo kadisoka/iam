@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/citadelium/pkg/errors"
-	dataerrs "github.com/citadelium/pkg/errors/data"
+	"github.com/citadelium/foundation/pkg/errors"
+	dataerrs "github.com/citadelium/foundation/pkg/errors/data"
 
 	"github.com/citadelium/iam/pkg/iam"
 )
