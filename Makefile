@@ -49,7 +49,7 @@ deps-up:
 
 _init_iam_db:
 	docker run --rm -v $(CURDIR)/iam/pkg/iamserver/migrations:/migrations \
-		--entrypoint=psql --network=citadel_default \
+		--entrypoint=psql --network=iam_default \
 		$(POSTGRES_IMAGE) \
 		-f ./migrations/000.00-iam.sql \
 		"postgres://iam:hdig8g4g49htuhe@iam-db/iam?sslmode=disable"

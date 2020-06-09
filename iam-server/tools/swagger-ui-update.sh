@@ -2,15 +2,16 @@
 
 set -e
 
-CHECKOUTDIR=./.cache/swagger-ui
+CHECKOUTDIR=$(mktemp -d 2>/dev/null || mktemp -d -t 'mytmpdir')
 TARGETDIR=./iam-server/resources/swagger-ui
 
 rm -rf $CHECKOUTDIR
 mkdir -p $CHECKOUTDIR
 
+echo "Querying latest tag..."
 # https://stackoverflow.com/questions/10649814/get-last-git-tag-from-a-remote-repo-without-cloning
 LATESTTAG=$(git ls-remote --tags --refs --sort="v:refname" https://github.com/swagger-api/swagger-ui.git | tail -n1 | sed 's/.*\///')
-echo "Version $LATESTTAG"
+echo "Latest tag: $LATESTTAG"
 
 git -c advice.detachedHead=false clone --depth 1 --branch $LATESTTAG https://github.com/swagger-api/swagger-ui.git $CHECKOUTDIR
 

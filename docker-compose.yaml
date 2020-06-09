@@ -1,5 +1,7 @@
 # NOTE: to be run from the top directory
+
 version: "3"
+
 services:
   iam-db:
     image: postgres:10.7-alpine
@@ -15,7 +17,7 @@ services:
     ports:
       - "11101:9000"
     volumes:
-      - ./var/iam-object-store:/data
+      - ./iam-server/var/iam-object-store:/data
     environment:
       - MINIO_ACCESS_KEY=AKIAIOSFODNN7EXAMPLE
       - MINIO_SECRET_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
@@ -35,9 +37,9 @@ services:
       - "11131:50051"
     volumes:
       # To simulate secrets in Swarm mode
-      - ./etc/secrets:/run/secrets
+      - ./iam-server/etc/secrets:/run/secrets
     env_file:
-      - ./etc/secrets/config.env
+      - ./iam-server/etc/secrets/config.env
     environment:
       - IAM_GRPC_ENABLED=true
       - IAM_HTTP_BASE_PATH=/

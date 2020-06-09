@@ -3,5 +3,6 @@
 
 /.cache
 
-/var
-/etc/secrets
+/iam-server/.cache
+/iam-server/var
+/iam-server/etc/secrets
