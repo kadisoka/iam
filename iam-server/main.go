@@ -51,7 +51,8 @@ func initApp() (app.App, error) {
 		// REST API
 		RESTEnabled: true,
 		REST: &srvrest.ServerConfig{
-			ServePort: 9080,
+			ServePort:    9080,
+			SwaggerUIDir: "./resources/swagger-ui",
 		},
 		// gRPC API
 		GRPCEnabled: false,

@@ -23,9 +23,10 @@ import (
 const ServerLatestVersionString = "v1"
 
 type ServerConfig struct {
-	ServePort int             `env:"SERVE_PORT"`
-	ServePath string          `env:"SERVE_PATH"`
-	V1        *ServerV1Config `env:"V1"`
+	ServePort    int             `env:"SERVE_PORT"`
+	ServePath    string          `env:"SERVE_PATH"`
+	SwaggerUIDir string          `env:"SWAGGER_UI_DIR"`
+	V1           *ServerV1Config `env:"V1"`
 }
 
 type ServerV1Config struct {
@@ -127,9 +128,11 @@ func NewServer(
 		},
 	}))
 
-	serveMux.Handle(servePath+"/apidocs/",
-		http.StripPrefix(servePath+"/apidocs/",
-			http.FileServer(http.Dir("resources/swagger-ui"))))
+	if config.SwaggerUIDir != "" {
+		serveMux.Handle(servePath+"/apidocs/",
+			http.StripPrefix(servePath+"/apidocs/",
+				http.FileServer(http.Dir(config.SwaggerUIDir))))
+	}
 
 	srv := &Server{
 		config:   config,
