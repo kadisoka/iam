@@ -2,7 +2,9 @@
 
 set -e
 
+# https://unix.stackexchange.com/questions/30091/fix-or-alternative-for-mktemp-in-os-x
 CHECKOUTDIR=$(mktemp -d 2>/dev/null || mktemp -d -t 'mytmpdir')
+
 TARGETDIR=./iam-server/resources/swagger-ui
 
 rm -rf $CHECKOUTDIR
@@ -13,6 +15,8 @@ echo "Querying latest tag..."
 LATESTTAG=$(git ls-remote --tags --refs --sort="v:refname" https://github.com/swagger-api/swagger-ui.git | tail -n1 | sed 's/.*\///')
 echo "Latest tag: $LATESTTAG"
 
+# https://stackoverflow.com/questions/20280726/how-to-git-clone-a-specific-tag
+# https://stackoverflow.com/questions/36794501/disable-warning-about-detached-head
 git -c advice.detachedHead=false clone --depth 1 --branch $LATESTTAG https://github.com/swagger-api/swagger-ui.git $CHECKOUTDIR
 
 echo $LATESTTAG > $CHECKOUTDIR/dist/VERSION

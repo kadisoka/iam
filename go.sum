@@ -7,11 +7,11 @@ github.com/PuerkitoBio/purell v1.1.1 h1:WEQqlqaGbrPkxLJWfBwQmfEAE1Z7ONdDLqrN38tN
 github.com/PuerkitoBio/purell v1.1.1/go.mod h1:c11w/QuzBsJSee3cPx9rAFu61PvFxuPbtSwDGJws/X0=
 github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 h1:d+Bc7a5rLufV/sSk/8dngufqelfh6jnri85riMAaF/M=
 github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578/go.mod h1:uGdkoq3SwY9Y+13GIhn11/XLaGBb4BfwItxLd5jeuXE=
-github.com/aws/aws-sdk-go v1.31.13 h1:UeWMTRTL0XAKLR7vxDL4/u7KOtz/LtfJr+lXtxN4YEQ=
-github.com/aws/aws-sdk-go v1.31.13/go.mod h1:5zCpMtNQVjRREroY7sYe8lOMRSxkhG6MZveU8YkpAk0=
+github.com/aws/aws-sdk-go v1.31.14 h1:uRC2riabEXPMHl1CDylsfCod5DKjiOSXhYvxg/Eb9V8=
+github.com/aws/aws-sdk-go v1.31.14/go.mod h1:5zCpMtNQVjRREroY7sYe8lOMRSxkhG6MZveU8YkpAk0=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
-github.com/citadelium/foundation v0.0.0-20200609143229-b8ffe22c7af9 h1:mzfF0D+ZPmkGF+67j7jn/7B5SdEoTeuzITv945R6heM=
-github.com/citadelium/foundation v0.0.0-20200609143229-b8ffe22c7af9/go.mod h1:oC0Ii8QUFC6DNi9UZg/P9vAi/dhDjc+MSKiqcLNJUmg=
+github.com/citadelium/foundation v0.0.0-20200609184002-e7f4d9ea759f h1:W5JBYW59z606W8iMzfc1RKSjAAhis/RKxPYxB6YDbk4=
+github.com/citadelium/foundation v0.0.0-20200609184002-e7f4d9ea759f/go.mod h1:oQHxRl8H22WTagfx9PZJjzjsLLO36VysqhBKq75lV1g=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGXZJjfX53e64911xZQV5JYwmTeXPW+k8Sc=
 github.com/coreos/go-systemd v0.0.0-20190321100706-95778dfbb74e/go.mod h1:F5haX7vjVVG0kc13fIWeqUViNPyEJxv/OmvnBo0Yme4=
