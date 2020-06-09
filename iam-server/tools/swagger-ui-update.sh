@@ -25,6 +25,6 @@ cp $CHECKOUTDIR/LICENSE $TARGETDIR/
 # Replace URL for JSON file.
 #NOTE this seems to be macOS quirk (the need for '--')
 sed -i -- 's/https:\/\/petstore\.swagger\.io\/v2\/swagger\.json/\.\.\/apidocs\.json/g' "$TARGETDIR/index.html"
-rm "$TARGETDIR/index.html--"
+rm -f "$TARGETDIR/index.html--"
 
 echo "Done."
