@@ -1,0 +1,5 @@
+Analogous to `/etc` folder on UNIX.
+
+Contains static data, configuration, credentials for the services.
+
+Any credentials or secrets here must be only used for local deployment.

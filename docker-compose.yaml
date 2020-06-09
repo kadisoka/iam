@@ -1,0 +1,46 @@
+# NOTE: to be run from the top directory
+version: "3"
+services:
+  iam-db:
+    image: postgres:10.7-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=iam
+      - POSTGRES_USER=iam
+      - POSTGRES_PASSWORD=hdig8g4g49htuhe
+
+  iam-object-store:
+    image: minio/minio:RELEASE.2020-05-16T01-33-21Z
+    ports:
+      - "11101:9000"
+    volumes:
+      - ./var/iam-object-store:/data
+    environment:
+      - MINIO_ACCESS_KEY=AKIAIOSFODNN7EXAMPLE
+      - MINIO_SECRET_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+    command: server /data
+
+  iam-server:
+    build:
+      context: .
+      dockerfile: ./iam-server/Dockerfile
+    restart: on-failure
+    depends_on:
+      - iam-db
+      - iam-object-store
+    ports:
+      - "11111:8080"
+      - "11121:9080"
+      - "11131:50051"
+    volumes:
+      # To simulate secrets in Swarm mode
+      - ./etc/secrets:/run/secrets
+    env_file:
+      - ./etc/secrets/config.env
+    environment:
+      - IAM_GRPC_ENABLED=true
+      - IAM_HTTP_BASE_PATH=/
+      - IAM_REST_CANONICAL_BASE_URL=http://localhost:11121/rest/v1/
+      - LOG_LEVEL=debug
+      - LOG_PRETTY=true
