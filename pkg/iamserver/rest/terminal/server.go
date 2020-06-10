@@ -10,7 +10,6 @@ import (
 	"github.com/citadelium/foundation/pkg/errors"
 	"github.com/emicklei/go-restful"
 	restfulspec "github.com/emicklei/go-restful-openapi"
-	"github.com/tomasen/realip"
 	"golang.org/x/text/language"
 
 	"github.com/citadelium/iam/pkg/iam"
@@ -115,18 +114,16 @@ func (restSrv *Server) postTerminalsRegister(
 			realmName = "Restricted"
 		}
 		resp.Header().Set("WWW-Authenticate", fmt.Sprintf("Basic realm=%q", realmName))
-		resp.WriteHeaderAndJson(http.StatusUnauthorized,
-			&rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusUnauthorized)
 		return
 	}
 
 	if reqClient == nil {
 		log.WithRequest(req.Request).
 			Warn().Msg("No authorized client")
-		resp.WriteHeaderAndJson(http.StatusUnauthorized,
-			&rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusUnauthorized)
 		return
 	}
 
@@ -134,16 +131,16 @@ func (restSrv *Server) postTerminalsRegister(
 	if err != nil && err != iam.ErrReqFieldAuthorizationTypeUnsupported {
 		log.WithContext(reqCtx).
 			Warn().Err(err).Msg("Unable to read authorization")
-		resp.WriteHeaderAndJson(http.StatusInternalServerError, rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusInternalServerError)
 		return
 	}
 	authCtx := reqCtx.Authorization()
 	if authCtx.IsValid() {
 		log.WithContext(reqCtx).
 			Warn().Msg("Authorization context must not be valid")
-		resp.WriteHeaderAndJson(http.StatusUnauthorized, rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusUnauthorized)
 		return
 	}
 
@@ -152,8 +149,16 @@ func (restSrv *Server) postTerminalsRegister(
 	if err != nil {
 		log.WithContext(reqCtx).
 			Warn().Err(err).Msg("Unable to read entity from the request body")
-		resp.WriteHeaderAndJson(http.StatusBadRequest, rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusBadRequest)
+		return
+	}
+
+	if terminalRegisterReq.VerificationResourceName == "" {
+		log.WithContext(reqCtx).
+			Warn().Msg("Resource name is missing")
+		rest.RespondTo(resp).EmptyError(
+			http.StatusBadRequest)
 		return
 	}
 
@@ -171,8 +176,8 @@ func (restSrv *Server) postTerminalsRegister(
 
 		log.WithContext(reqCtx).
 			Warn().Msg("Resource verification type is missing")
-		resp.WriteHeaderAndJson(http.StatusBadRequest, rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusBadRequest)
 		return
 	}
 
@@ -189,8 +194,8 @@ func (restSrv *Server) postTerminalsRegister(
 	default:
 		log.WithContext(reqCtx).
 			Warn().Msgf("Unsupported verification resource type: %v", terminalRegisterReq.VerificationResourceType)
-		resp.WriteHeaderAndJson(http.StatusBadRequest, rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusBadRequest)
 		return
 	}
 }
@@ -202,8 +207,8 @@ func (restSrv *Server) postTerminalsSecret(
 	if err != nil {
 		log.WithContext(reqCtx).
 			Warn().Err(err).Msg("Unable to load authorization")
-		resp.WriteHeaderAndJson(http.StatusBadRequest, &rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusBadRequest)
 		return
 	}
 
@@ -217,8 +222,8 @@ func (restSrv *Server) postTerminalsSecret(
 	if err != nil {
 		log.WithContext(reqCtx).
 			Warn().Err(err).Msgf("Unable to parse terminal ID %q", linkConfirmReq.TerminalID)
-		resp.WriteHeaderAndJson(http.StatusBadRequest, &rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusBadRequest)
 		return
 	}
 
@@ -230,32 +235,31 @@ func (restSrv *Server) postTerminalsSecret(
 			log.WithContext(reqCtx).
 				Warn().Msgf(
 				"Terminal %v verification code mismatch", linkConfirmReq.TerminalID)
-			resp.WriteHeaderAndJson(http.StatusBadRequest, &rest.ErrorResponse{},
-				restful.MIME_JSON)
+			rest.RespondTo(resp).EmptyError(
+				http.StatusBadRequest)
 			return
 		case iam.ErrTerminalVerificationCodeExpired:
 			log.WithContext(reqCtx).
 				Warn().Msgf(
 				"Terminal %v verification code expired", linkConfirmReq.TerminalID)
-			resp.WriteHeaderAndJson(http.StatusGone, &rest.ErrorResponse{},
-				restful.MIME_JSON)
+			rest.RespondTo(resp).EmptyError(
+				http.StatusGone)
 			return
 		case iam.ErrTerminalVerificationResourceConflict:
 			log.WithContext(reqCtx).
 				Warn().Msgf(
 				"Terminal %v verification resource conflict", linkConfirmReq.TerminalID)
-			resp.WriteHeaderAndJson(http.StatusConflict, &rest.ErrorResponse{},
-				restful.MIME_JSON)
+			rest.RespondTo(resp).EmptyError(
+				http.StatusConflict)
 			return
 		}
 		panic(err)
 	}
 
-	resp.WriteHeaderAndJson(http.StatusOK,
+	rest.RespondTo(resp).Success(
 		&iam.TerminalSecretPostResponseJSONV1{
 			Secret: termSecret,
-		},
-		restful.MIME_JSON)
+		})
 
 	return
 }
@@ -267,15 +271,15 @@ func (restSrv *Server) putTerminalFCMRegistrationToken(
 	if err != nil {
 		log.WithContext(reqCtx).
 			Err(err).Msg("Unable to read authorization")
-		resp.WriteHeaderAndJson(http.StatusInternalServerError, rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusInternalServerError)
 		return
 	}
 	if !reqCtx.IsUserContext() {
 		log.WithContext(reqCtx).
 			Warn().Msg("Unauthorized request")
-		resp.WriteHeaderAndJson(http.StatusUnauthorized, rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusUnauthorized)
 		return
 	}
 	authCtx := reqCtx.Authorization()
@@ -289,8 +293,8 @@ func (restSrv *Server) putTerminalFCMRegistrationToken(
 	if fcmRegTokenReq.Token == "" {
 		log.WithContext(reqCtx).
 			Warn().Msg("Empty token")
-		resp.WriteHeaderAndJson(http.StatusBadRequest, rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusBadRequest)
 		return
 	}
 
@@ -302,7 +306,7 @@ func (restSrv *Server) putTerminalFCMRegistrationToken(
 		panic(err)
 	}
 
-	resp.WriteHeader(http.StatusNoContent)
+	rest.RespondTo(resp).Success(nil)
 }
 
 // terminal register using phone number
@@ -315,10 +319,10 @@ func (restSrv *Server) handleTerminalRegisterByPhoneNumber(
 	// Only for non-confidential user-agents
 	if clientID := authClient.ID; !clientID.IsPublic() && !clientID.IsUserAgent() {
 		log.WithContext(reqCtx).
-			Warn().Msgf("Client %v is not allowed to use this verification resource type", authClient.ID)
-		resp.WriteHeaderAndJson(http.StatusForbidden,
-			&rest.ErrorResponse{},
-			restful.MIME_JSON)
+			Warn().Msgf(
+			"Client %v is not allowed to use this verification resource type", authClient.ID)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusForbidden)
 		return
 	}
 
@@ -327,11 +331,12 @@ func (restSrv *Server) handleTerminalRegisterByPhoneNumber(
 	phoneNumber, err := iam.PhoneNumberFromString(terminalRegisterReq.VerificationResourceName)
 	if err != nil {
 		log.WithContext(reqCtx).
-			Warn().Err(err).Msgf("Unable to parse verification resource name %s of type %s",
+			Warn().Err(err).Msgf(
+			"Unable to parse verification resource name %s of type %s",
 			terminalRegisterReq.VerificationResourceName,
 			terminalRegisterReq.VerificationResourceType)
-		resp.WriteHeaderAndJson(http.StatusBadRequest, &rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusBadRequest)
 		return
 	}
 
@@ -351,25 +356,25 @@ func (restSrv *Server) handleTerminalRegisterByPhoneNumber(
 	if err != nil {
 		if errors.IsCallError(err) {
 			log.WithContext(reqCtx).
-				Warn().Err(err).Msgf("StartTerminalAuthorizationByPhoneNumber with %v failed",
-				phoneNumber)
-			resp.WriteHeaderAndJson(http.StatusBadRequest,
-				&rest.ErrorResponse{}, restful.MIME_JSON)
+				Warn().Err(err).Msgf(
+				"StartTerminalAuthorizationByPhoneNumber with %v failed", phoneNumber)
+			rest.RespondTo(resp).EmptyError(
+				http.StatusBadRequest)
 			return
 		}
 		log.WithContext(reqCtx).
-			Err(err).Msgf("StartTerminalAuthorizationByPhoneNumber with %v failed",
-			phoneNumber)
-		resp.WriteHeader(http.StatusInternalServerError)
+			Err(err).Msgf(
+			"StartTerminalAuthorizationByPhoneNumber with %v failed", phoneNumber)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusInternalServerError)
 		return
 	}
 
-	resp.WriteHeaderAndJson(http.StatusOK,
+	rest.RespondTo(resp).Success(
 		&iam.TerminalRegisterPostResponseJSONV1{
 			TerminalID: terminalID.String(),
 			CodeExpiry: codeExpiry,
-		},
-		restful.MIME_JSON)
+		})
 	return
 }
 
@@ -382,29 +387,31 @@ func (restSrv *Server) handleTerminalRegisterByEmailAddress(
 ) {
 	if clientID := authClient.ID; !clientID.IsPublic() && !clientID.IsUserAgent() {
 		log.WithContext(reqCtx).
-			Warn().Msgf("Client %v is not allowed to use this verification resource type", authClient.ID)
-		resp.WriteHeaderAndJson(http.StatusForbidden,
-			&rest.ErrorResponse{},
-			restful.MIME_JSON)
+			Warn().Msgf(
+			"Client %v is not allowed to use this verification resource type", authClient.ID)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusForbidden)
 		return
 	}
 
 	termLangTags := restSrv.parseRequestAcceptLanguageTags(reqCtx, "")
 	emailAddressStr := terminalRegisterReq.VerificationResourceName
 	if !iam.IsValidEmailAddress(emailAddressStr) {
-		log.WithContext(reqCtx).Warn().Msgf("Email address %v, is not valid", emailAddressStr)
-		resp.WriteHeaderAndJson(http.StatusBadRequest, rest.ErrorResponse{},
-			restful.MIME_JSON)
+		log.WithContext(reqCtx).
+			Warn().Msgf("Email address %v, is not valid", emailAddressStr)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusBadRequest)
 		return
 	}
 	emailAddress, err := iam.EmailAddressFromString(emailAddressStr)
 	if err != nil {
 		log.WithContext(reqCtx).
-			Warn().Err(err).Msgf("Unable to parse verification resource name %s of type %s",
+			Warn().Err(err).Msgf(
+			"Unable to parse verification resource name %s of type %s",
 			terminalRegisterReq.VerificationResourceName,
 			terminalRegisterReq.VerificationResourceType)
-		resp.WriteHeaderAndJson(http.StatusBadRequest, &rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusBadRequest)
 		return
 	}
 
@@ -426,23 +433,23 @@ func (restSrv *Server) handleTerminalRegisterByEmailAddress(
 			log.WithContext(reqCtx).
 				Warn().Err(err).Msgf("StartTerminalAuthorizationByEmailAddress with %v failed",
 				emailAddress)
-			resp.WriteHeaderAndJson(http.StatusBadRequest,
-				&rest.ErrorResponse{}, restful.MIME_JSON)
+			rest.RespondTo(resp).EmptyError(
+				http.StatusBadRequest)
 			return
 		}
 		log.WithContext(reqCtx).
 			Err(err).Msgf("StartTerminalAuthorizationByEmailAddress with %v failed",
 			emailAddress)
-		resp.WriteHeader(http.StatusInternalServerError)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusInternalServerError)
 		return
 	}
 
-	resp.WriteHeaderAndJson(http.StatusOK,
+	rest.RespondTo(resp).Success(
 		&iam.TerminalRegisterPostResponseJSONV1{
 			TerminalID: terminalID.String(),
 			CodeExpiry: codeExpiry,
-		},
-		restful.MIME_JSON)
+		})
 	return
 }
 
@@ -456,9 +463,8 @@ func (restSrv *Server) handleTerminalRegisterByImplicit(
 	if !authClient.ID.IsConfidential() {
 		log.WithContext(reqCtx).
 			Warn().Msgf("Client %v is not allowed to use this verification resource type", authClient.ID)
-		resp.WriteHeaderAndJson(http.StatusForbidden,
-			&rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusForbidden)
 		return
 	}
 
@@ -467,9 +473,8 @@ func (restSrv *Server) handleTerminalRegisterByImplicit(
 		//TODO: determine if we should support user context
 		log.WithContext(reqCtx).
 			Warn().Msgf("Client %v is authenticating by implicit grant with valid user context", authClient.ID)
-		resp.WriteHeaderAndJson(http.StatusForbidden,
-			&rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusForbidden)
 		return
 	}
 
@@ -480,7 +485,7 @@ func (restSrv *Server) handleTerminalRegisterByImplicit(
 	var ipAddress string
 	var userAgent string
 	if httpReq := reqCtx.HTTPRequest(); httpReq != nil {
-		ipAddress = realip.FromRequest(reqCtx.HTTPRequest())
+		ipAddress = reqCtx.RemoteAddress()
 		userAgent = httpReq.UserAgent()
 	}
 
@@ -502,13 +507,11 @@ func (restSrv *Server) handleTerminalRegisterByImplicit(
 		panic(err)
 	}
 
-	resp.WriteHeaderAndJson(http.StatusOK,
+	rest.RespondTo(resp).Success(
 		&iam.TerminalRegisterPostResponseJSONV1{
 			TerminalID:     termID.String(),
 			TerminalSecret: termSecret,
-		},
-		restful.MIME_JSON)
-
+		})
 	return
 }
 

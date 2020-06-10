@@ -57,7 +57,7 @@ func (logger Logger) WithContext(
 			Str("url", urlStr)
 		if !hasAuth {
 			logCtx = logCtx.
-				Str("remote_ip", realip.FromRequest(req)).
+				Str("remote_addr", ctx.RemoteAddress()).
 				Str("user_agent", req.UserAgent())
 		}
 	}
@@ -86,10 +86,15 @@ func (logger Logger) WithRequest(
 		urlStr = req.URL.String()
 	}
 
+	remoteAddr := realip.FromRequest(req)
+	if remoteAddr == "" {
+		remoteAddr = req.RemoteAddr
+	}
+
 	l := logger.With().
 		Str("method", req.Method).
 		Str("url", urlStr).
-		Str("remote_ip", realip.FromRequest(req)).
+		Str("remote_addr", remoteAddr).
 		Str("user_agent", req.UserAgent()).
 		Logger()
 	return &l

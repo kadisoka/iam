@@ -20,14 +20,16 @@ func (restSrv *Server) getUserOpenIDConnectUserInfo(
 	if err != nil {
 		log.WithContext(reqCtx).
 			Err(err).Msg("Request context")
-		resp.WriteHeaderAndJson(http.StatusInternalServerError, &rest.ErrorResponse{}, restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusInternalServerError)
 		return
 	}
 	authCtx := reqCtx.Authorization()
 	if authCtx.IsNotValid() {
 		log.WithContext(reqCtx).
 			Warn().Err(err).Msg("Unauthorized")
-		resp.WriteHeaderAndJson(http.StatusUnauthorized, &rest.ErrorResponse{}, restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusUnauthorized)
 		return
 	}
 
@@ -39,7 +41,8 @@ func (restSrv *Server) getUserOpenIDConnectUserInfo(
 	if err != nil {
 		log.WithContext(reqCtx).
 			Err(err).Msg("User base profile fetch")
-		resp.WriteHeaderAndJson(http.StatusInternalServerError, &rest.ErrorResponse{}, restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusInternalServerError)
 		return
 	}
 
@@ -48,8 +51,8 @@ func (restSrv *Server) getUserOpenIDConnectUserInfo(
 	if err != nil {
 		log.WithContext(reqCtx).
 			Err(err).Msg("User phone number fetch")
-		resp.WriteHeaderAndJson(http.StatusInternalServerError,
-			&rest.ErrorResponse{}, restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusInternalServerError)
 		return
 	}
 	var phoneNumberStr string
@@ -66,8 +69,8 @@ func (restSrv *Server) getUserOpenIDConnectUserInfo(
 	if err != nil {
 		log.WithContext(reqCtx).
 			Err(err).Msg("User email address fetch")
-		resp.WriteHeaderAndJson(http.StatusInternalServerError,
-			&rest.ErrorResponse{}, restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusInternalServerError)
 		return
 	}
 	var emailAddressStr string

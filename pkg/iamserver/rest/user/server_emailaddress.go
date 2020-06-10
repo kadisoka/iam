@@ -19,10 +19,8 @@ func (restSrv *Server) putUserEmailAddress(
 	if err != nil {
 		log.WithContext(reqCtx).
 			Warn().Msgf("Unable to load request authorization: %v", err)
-		resp.WriteHeaderAndJson(
-			http.StatusBadRequest,
-			&rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusBadRequest)
 		return
 	}
 
@@ -31,10 +29,8 @@ func (restSrv *Server) putUserEmailAddress(
 	if err != nil {
 		log.WithContext(reqCtx).
 			Warn().Msgf("Unable to read request body: %v", err)
-		resp.WriteHeaderAndJson(
-			http.StatusBadRequest,
-			&rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusBadRequest)
 		return
 	}
 
@@ -43,10 +39,8 @@ func (restSrv *Server) putUserEmailAddress(
 	if err != nil {
 		log.WithContext(reqCtx).
 			Warn().Msgf("Email address %v, is not valid", emailAddress)
-		resp.WriteHeaderAndJson(
-			http.StatusBadRequest,
-			&rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusBadRequest)
 		return
 	}
 
@@ -72,7 +66,8 @@ func (restSrv *Server) handleSetEmailAddress(
 	authCtx := reqCtx.Authorization()
 	if authCtx.IsNotValid() && !authCtx.IsUserContext() {
 		log.WithContext(reqCtx).Warn().Msgf("Unauthorized")
-		resp.WriteHeaderAndJson(http.StatusUnauthorized, &rest.ErrorResponse{}, restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusUnauthorized)
 		return
 	}
 
@@ -80,14 +75,14 @@ func (restSrv *Server) handleSetEmailAddress(
 		targetUserID, err := iam.UserIDFromString(targetUserIDStr)
 		if err != nil {
 			log.WithContext(reqCtx).Warn().Msgf("Invalid user ID: %v", err)
-			resp.WriteHeaderAndJson(http.StatusBadRequest, &rest.ErrorResponse{},
-				restful.MIME_JSON)
+			rest.RespondTo(resp).EmptyError(
+				http.StatusBadRequest)
 			return
 		}
 		if targetUserID != authCtx.UserID {
 			log.WithContext(reqCtx).Warn().Msgf("Setting other user's email address is not allowed")
-			resp.WriteHeaderAndJson(http.StatusForbidden, &rest.ErrorResponse{},
-				restful.MIME_JSON)
+			rest.RespondTo(resp).EmptyError(
+				http.StatusForbidden)
 			return
 		}
 	}
@@ -100,28 +95,29 @@ func (restSrv *Server) handleSetEmailAddress(
 			log.WithContext(reqCtx).
 				Warn().Msgf("SetUserPrimaryEmailAddress to %v: %v",
 				emailAddress, err)
-			resp.WriteHeaderAndJson(http.StatusBadRequest,
-				rest.ErrorResponse{}, restful.MIME_JSON)
+			rest.RespondTo(resp).EmptyError(
+				http.StatusBadRequest)
 			return
 		}
 		log.WithContext(reqCtx).
 			Error().Msgf("SetUserPrimaryEmailAddress to %v: %v",
 			emailAddress, err)
-		resp.WriteHeader(http.StatusInternalServerError)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusInternalServerError)
 		return
 	}
 
 	if verificationID == 0 {
-		resp.WriteHeader(http.StatusNoContent)
+		rest.RespondTo(resp).Success(nil)
 		return
 	}
 
-	resp.WriteHeaderAndJson(http.StatusAccepted,
+	rest.RespondTo(resp).SuccessWithHTTPStatusCode(
 		&UserEmailAddressPutResponse{
 			VerificationID: verificationID,
 			CodeExpiry:     *codeExpiry,
 		},
-		restful.MIME_JSON)
+		http.StatusAccepted)
 	return
 }
 
@@ -133,8 +129,8 @@ func (restSrv *Server) postUserEmailAddressVerificationConfirmation(
 	if !reqCtx.IsUserContext() {
 		log.WithContext(reqCtx).
 			Warn().Msgf("Unauthorized: %v", err)
-		resp.WriteHeaderAndJson(http.StatusUnauthorized, &rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusUnauthorized)
 		return
 	}
 
@@ -143,8 +139,8 @@ func (restSrv *Server) postUserEmailAddressVerificationConfirmation(
 	if err != nil {
 		log.WithContext(reqCtx).
 			Warn().Msgf("Unable to load request content: %v", err)
-		resp.WriteHeaderAndJson(http.StatusBadRequest, &rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusBadRequest)
 		return
 	}
 
@@ -156,23 +152,24 @@ func (restSrv *Server) postUserEmailAddressVerificationConfirmation(
 			log.WithContext(reqCtx).
 				Warn().Msgf("ConfirmUserEmailAddressVerification %v failed: %v",
 				reqEntity.VerificationID, err)
-			resp.WriteHeaderAndJson(http.StatusBadRequest,
-				&rest.ErrorResponse{}, restful.MIME_JSON)
+			rest.RespondTo(resp).EmptyError(
+				http.StatusBadRequest)
 			return
 		}
 		log.WithContext(reqCtx).
 			Error().Msgf("ConfirmUserEmailAddressVerification %v failed: %v",
 			reqEntity.VerificationID, err)
-		resp.WriteHeader(http.StatusInternalServerError)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusInternalServerError)
 		return
 	}
 
 	if !updated {
-		resp.WriteHeader(http.StatusGone)
+		rest.RespondTo(resp).EmptyError(http.StatusGone)
 		return
 	}
 
-	resp.WriteHeader(http.StatusNoContent)
+	rest.RespondTo(resp).Success(nil)
 }
 
 type UserEmailAddressPutRequestJSONV1 struct {

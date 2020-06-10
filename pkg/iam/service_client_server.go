@@ -10,7 +10,9 @@ import (
 	dataerrs "github.com/citadelium/foundation/pkg/errors/data"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
+	"github.com/tomasen/realip"
 	grpcmd "google.golang.org/grpc/metadata"
+	grpcpeer "google.golang.org/grpc/peer"
 
 	"github.com/citadelium/iam/pkg/jose/jws"
 )
@@ -167,14 +169,19 @@ func (svcClServer *ServiceClientServerCore) GRPCCallContext(
 func (svcClServer *ServiceClientServerCore) callContextFromGRPCContext(
 	grpcCallCtx context.Context,
 ) (CallContext, error) {
+	var remoteAddr string
+	if peer, _ := grpcpeer.FromContext(grpcCallCtx); peer != nil {
+		remoteAddr = peer.Addr.String() //TODO: attempt to resolve if it's proxied
+	}
+
 	authCtx, err := svcClServer.authorizationFromGRPCContext(grpcCallCtx)
 	if err != nil {
-		return newCallContext(grpcCallCtx, authCtx, nil), err
+		return newCallContext(grpcCallCtx, authCtx, remoteAddr, nil), err
 	}
 	var requestID *api.RequestID
 	md, ok := grpcmd.FromIncomingContext(grpcCallCtx)
 	if !ok {
-		return newCallContext(grpcCallCtx, authCtx, nil), nil
+		return newCallContext(grpcCallCtx, authCtx, remoteAddr, nil), nil
 	}
 	reqIDStrs := md.Get("request-id")
 	if len(reqIDStrs) == 0 {
@@ -184,15 +191,15 @@ func (svcClServer *ServiceClientServerCore) callContextFromGRPCContext(
 		reqIDStr := reqIDStrs[0]
 		u, err := uuid.Parse(reqIDStr)
 		if err != nil {
-			return newCallContext(grpcCallCtx, authCtx, nil),
+			return newCallContext(grpcCallCtx, authCtx, remoteAddr, nil),
 				ReqFieldErr("Request-ID", dataerrs.Malformed(err))
 		}
 		if isValidRequestID(u) {
-			return newCallContext(grpcCallCtx, authCtx, nil), ReqFieldErr("Request-ID", nil)
+			return newCallContext(grpcCallCtx, authCtx, remoteAddr, nil), ReqFieldErr("Request-ID", nil)
 		}
 		requestID = &u
 	}
-	return newCallContext(grpcCallCtx, authCtx, requestID), err
+	return newCallContext(grpcCallCtx, authCtx, remoteAddr, requestID), err
 }
 
 func (svcClServer *ServiceClientServerCore) authorizationFromGRPCContext(
@@ -257,6 +264,10 @@ func (svcClServer *ServiceClientServerCore) callContextFromHTTPRequest(
 
 	jwtStr := strings.TrimSpace(authParts[1])
 	authCtx, err := svcClServer.AuthorizationFromJWTString(jwtStr)
+	remoteAddr := realip.FromRequest(req)
+	if remoteAddr == "" {
+		remoteAddr = req.RemoteAddr
+	}
 
 	// Get from query too?
 	var requestID *api.RequestID
@@ -267,16 +278,16 @@ func (svcClServer *ServiceClientServerCore) callContextFromHTTPRequest(
 	if requestIDStr != "" {
 		u, err := uuid.Parse(requestIDStr)
 		if err != nil {
-			return newCallContext(ctx, authCtx, nil),
+			return newCallContext(ctx, authCtx, remoteAddr, nil),
 				ReqFieldErr("Request-ID", dataerrs.Malformed(err))
 		}
 		if isValidRequestID(u) {
-			return newCallContext(ctx, authCtx, nil), ReqFieldErr("Request-ID", nil)
+			return newCallContext(ctx, authCtx, remoteAddr, nil), ReqFieldErr("Request-ID", nil)
 		}
 		requestID = &u
 	}
 
-	return newCallContext(ctx, authCtx, requestID), err
+	return newCallContext(ctx, authCtx, remoteAddr, requestID), err
 }
 
 func isValidRequestID(u uuid.UUID) bool {

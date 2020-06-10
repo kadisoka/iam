@@ -11,9 +11,8 @@ import (
 
 func (restSrv *Server) postToken(req *restful.Request, resp *restful.Response) {
 	if req.Request.Method != http.MethodPost {
-		resp.WriteHeaderAndJson(http.StatusMethodNotAllowed,
-			&oauth2.ErrorResponse{Error: oauth2.ErrorInvalidRequest},
-			restful.MIME_JSON)
+		oauth2.RespondTo(resp).ErrorCode(
+			oauth2.ErrorInvalidRequest)
 		return
 	}
 
@@ -23,18 +22,16 @@ func (restSrv *Server) postToken(req *restful.Request, resp *restful.Response) {
 	if err != nil {
 		log.WithRequest(req.Request).
 			Warn().Msgf("unable to parse form: %v", err)
-		resp.WriteHeaderAndJson(http.StatusBadRequest,
-			&oauth2.ErrorResponse{Error: oauth2.ErrorInvalidRequest},
-			restful.MIME_JSON)
+		oauth2.RespondTo(resp).ErrorCode(
+			oauth2.ErrorInvalidRequest)
 		return
 	}
 	grantTypeArgVal := req.Request.FormValue("grant_type")
 	if grantTypeArgVal == "" {
 		log.WithRequest(req.Request).
 			Warn().Msgf("Empty grant_type")
-		resp.WriteHeaderAndJson(http.StatusBadRequest,
-			oauth2.ErrorResponse{Error: oauth2.ErrorInvalidRequest},
-			restful.MIME_JSON)
+		oauth2.RespondTo(resp).ErrorCode(
+			oauth2.ErrorInvalidRequest)
 		return
 	}
 	grantType := oauth2.GrantTypeFromString(grantTypeArgVal)
@@ -50,7 +47,7 @@ func (restSrv *Server) postToken(req *restful.Request, resp *restful.Response) {
 		restSrv.handleTokenRequestByPasswordGrant(req, resp)
 		return
 	case oauth2.GrantTypeRefreshToken:
-		//TODO: our refresh tokens are JWT which claims can be found
+		//TODO: our refresh tokens are JWT which claims structure can be found
 		// in iam.RefreshTokenClaims. It contains terminal ID (and optionally
 		// terminal secret). We load it and its related data and then
 		// issue another access token if the previous token is about to
@@ -58,16 +55,14 @@ func (restSrv *Server) postToken(req *restful.Request, resp *restful.Response) {
 		// the previously issued access token (check the authorization ID).
 		log.WithRequest(req.Request).
 			Warn().Msgf("Unsupported grant_type: %v", grantType)
-		resp.WriteHeaderAndJson(http.StatusNotImplemented,
-			oauth2.ErrorResponse{Error: oauth2.ErrorUnsupportedGrantType},
-			restful.MIME_JSON)
+		oauth2.RespondTo(resp).ErrorCode(
+			oauth2.ErrorUnsupportedGrantType)
 		return
 	default:
 		log.WithRequest(req.Request).
 			Warn().Msgf("Unsupported grant_type: %v", grantType)
-		resp.WriteHeaderAndJson(http.StatusBadRequest,
-			oauth2.ErrorResponse{Error: oauth2.ErrorUnsupportedGrantType},
-			restful.MIME_JSON)
+		oauth2.RespondTo(resp).ErrorCode(
+			oauth2.ErrorUnsupportedGrantType)
 		return
 	}
 }

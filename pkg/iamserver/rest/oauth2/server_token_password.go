@@ -3,8 +3,6 @@
 package oauth2
 
 import (
-	"fmt"
-	"net/http"
 	"strings"
 
 	"github.com/citadelium/foundation/pkg/api/oauth2"
@@ -23,14 +21,8 @@ func (restSrv *Server) handleTokenRequestByPasswordGrant(
 		log.WithRequest(req.Request).
 			Warn().Err(err).Msg("Client authentication")
 		// RFC 6749 § 5.2
-		realmName := restSrv.serverCore.RealmName()
-		if realmName == "" {
-			realmName = "Restricted"
-		}
-		resp.Header().Set("WWW-Authenticate", fmt.Sprintf("Basic realm=%q", realmName))
-		resp.WriteHeaderAndJson(http.StatusUnauthorized,
-			&oauth2.ErrorResponse{Error: oauth2.ErrorInvalidClient},
-			restful.MIME_JSON)
+		oauth2.RespondTo(resp).ErrInvalidClientBasicAuthorization(
+			restSrv.serverCore.RealmName(), "")
 		return
 	}
 
@@ -40,26 +32,23 @@ func (restSrv *Server) handleTokenRequestByPasswordGrant(
 	if err != nil && err != iam.ErrReqFieldAuthorizationTypeUnsupported {
 		log.WithContext(reqCtx).
 			Warn().Msgf("Unable to read authorization: %v", err)
-		resp.WriteHeaderAndJson(http.StatusInternalServerError,
-			&oauth2.ErrorResponse{Error: oauth2.ErrorServerError},
-			restful.MIME_JSON)
+		oauth2.RespondTo(resp).ErrorCode(
+			oauth2.ErrorServerError)
 		return
 	}
 	authCtx := reqCtx.Authorization()
 	if authCtx.IsValid() {
 		log.WithContext(reqCtx).
 			Warn().Msgf("Authorization context must not be valid")
-		resp.WriteHeaderAndJson(http.StatusInternalServerError,
-			&oauth2.ErrorResponse{Error: oauth2.ErrorServerError},
-			restful.MIME_JSON)
+		oauth2.RespondTo(resp).ErrorCode(
+			oauth2.ErrorServerError)
 		return
 	}
 
 	username := req.Request.FormValue("username")
 	if username == "" {
-		resp.WriteHeaderAndJson(http.StatusBadRequest,
-			&oauth2.ErrorResponse{Error: oauth2.ErrorInvalidGrant},
-			restful.MIME_JSON)
+		oauth2.RespondTo(resp).ErrorCode(
+			oauth2.ErrorInvalidGrant)
 		return
 	}
 	password := req.Request.FormValue("password")
@@ -79,9 +68,8 @@ func (restSrv *Server) handleTokenRequestByPasswordGrant(
 
 	log.WithRequest(req.Request).
 		Warn().Msgf("Password grant with no scheme.")
-	resp.WriteHeaderAndJson(http.StatusBadRequest,
-		&oauth2.ErrorResponse{Error: oauth2.ErrorInvalidGrant},
-		restful.MIME_JSON)
+	oauth2.RespondTo(resp).ErrorCode(
+		oauth2.ErrorInvalidGrant)
 }
 
 func (restSrv *Server) handleTokenRequestByPasswordGrantWithTerminalCreds(
@@ -95,9 +83,8 @@ func (restSrv *Server) handleTokenRequestByPasswordGrantWithTerminalCreds(
 	if err != nil {
 		log.WithContext(reqCtx).
 			Warn().Msgf("Unable to parse username %q as TerminalID: %v", terminalIDStr, err)
-		resp.WriteHeaderAndJson(http.StatusBadRequest,
-			&oauth2.ErrorResponse{Error: oauth2.ErrorInvalidGrant},
-			restful.MIME_JSON)
+		oauth2.RespondTo(resp).ErrorCode(
+			oauth2.ErrorInvalidGrant)
 		return
 	}
 
@@ -106,16 +93,16 @@ func (restSrv *Server) handleTokenRequestByPasswordGrantWithTerminalCreds(
 	if err != nil {
 		log.WithContext(reqCtx).
 			Error().Msgf("Terminal %v authentication failed: %v", terminalID, err)
-		resp.WriteHeaderAndJson(http.StatusInternalServerError,
-			&oauth2.ErrorResponse{Error: oauth2.ErrorServerError},
-			restful.MIME_JSON)
+		oauth2.RespondTo(resp).ErrorCode(
+			oauth2.ErrorServerError)
+		return
 	}
 	if !authOK {
 		log.WithContext(reqCtx).
 			Warn().Msgf("Terminal %v authentication failed", terminalID)
-		resp.WriteHeaderAndJson(http.StatusBadRequest,
-			&oauth2.ErrorResponse{Error: oauth2.ErrorInvalidGrant},
-			restful.MIME_JSON)
+		oauth2.RespondTo(resp).ErrorCode(
+			oauth2.ErrorInvalidGrant)
+		return
 	}
 
 	if userID.IsValid() {
@@ -124,9 +111,8 @@ func (restSrv *Server) handleTokenRequestByPasswordGrantWithTerminalCreds(
 		if err != nil {
 			log.WithContext(reqCtx).
 				Warn().Msgf("Terminal %v user account state: %v", terminalID, err)
-			resp.WriteHeaderAndJson(http.StatusInternalServerError,
-				&oauth2.ErrorResponse{Error: oauth2.ErrorServerError},
-				restful.MIME_JSON)
+			oauth2.RespondTo(resp).ErrorCode(
+				oauth2.ErrorServerError)
 			return
 		}
 		if userAccountState == nil || !userAccountState.IsAccountActive() {
@@ -138,9 +124,8 @@ func (restSrv *Server) handleTokenRequestByPasswordGrantWithTerminalCreds(
 			}
 			log.WithContext(reqCtx).
 				Warn().Msgf("User %v %s", userID, status)
-			resp.WriteHeaderAndJson(http.StatusBadRequest,
-				&oauth2.ErrorResponse{Error: oauth2.ErrorInvalidGrant},
-				restful.MIME_JSON)
+			oauth2.RespondTo(resp).ErrorCode(
+				oauth2.ErrorInvalidGrant)
 			return
 		}
 	}
@@ -149,9 +134,8 @@ func (restSrv *Server) handleTokenRequestByPasswordGrantWithTerminalCreds(
 		if reqClient.ID != terminalID.ClientID() {
 			log.WithContext(reqCtx).
 				Error().Msgf("Terminal %v is not associated to client %v", terminalID, reqClient.ID)
-			resp.WriteHeaderAndJson(http.StatusInternalServerError,
-				&oauth2.ErrorResponse{Error: oauth2.ErrorServerError},
-				restful.MIME_JSON)
+			oauth2.RespondTo(resp).ErrorCode(
+				oauth2.ErrorServerError)
 			return
 		}
 	}
@@ -168,7 +152,7 @@ func (restSrv *Server) handleTokenRequestByPasswordGrantWithTerminalCreds(
 		panic(err)
 	}
 
-	resp.WriteHeaderAndJson(http.StatusOK,
+	oauth2.RespondTo(resp).TokenCustom(
 		&iam.OAuth2TokenResponse{
 			TokenResponse: oauth2.TokenResponse{
 				AccessToken:  accessToken,
@@ -177,6 +161,5 @@ func (restSrv *Server) handleTokenRequestByPasswordGrantWithTerminalCreds(
 				RefreshToken: refreshToken,
 			},
 			UserID: userID.String(),
-		},
-		restful.MIME_JSON)
+		})
 }

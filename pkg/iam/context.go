@@ -34,10 +34,13 @@ type CallContext interface {
 func newCallContext(
 	ctx context.Context,
 	authCtx *Authorization,
+	remoteAddress string,
 	requestID *api.RequestID,
 ) CallContext {
-	//TODO: DO NOT allow nil authCtx
-	return &callContext{ctx, authCtx, requestID}
+	if authCtx == nil {
+		panic("authCtx must not be nil")
+	}
+	return &callContext{ctx, authCtx, remoteAddress, requestID}
 }
 
 var _ CallContext = &callContext{}
@@ -45,6 +48,7 @@ var _ CallContext = &callContext{}
 type callContext struct {
 	context.Context
 	authorization *Authorization
+	remoteAddress string
 	requestID     *api.RequestID
 }
 
@@ -64,3 +68,5 @@ func (ctx *callContext) IsUserContext() bool {
 func (ctx *callContext) MethodName() string { return "" }
 
 func (ctx *callContext) RequestID() *api.RequestID { return ctx.requestID }
+
+func (ctx *callContext) RemoteAddress() string { return ctx.remoteAddress }

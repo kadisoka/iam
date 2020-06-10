@@ -95,9 +95,9 @@ func (restSrv *Server) RestfulWebService() *restful.WebService {
 		Param(restWS.HeaderParameter("Authorization", "Bearer access token").
 			Required(true)).
 		Reads(userPasswordPutRequest{}).
-		Returns(http.StatusBadRequest, "Request has missing data or contains invalid data", &rest.ErrorResponse{}).
-		Returns(http.StatusUnauthorized, "Client authorization check failure", &rest.ErrorResponse{}).
-		Returns(http.StatusConflict, "Request has duplicate value or contains invalid data", &rest.ErrorResponse{}).
+		Returns(http.StatusBadRequest, "Request has missing data or contains invalid data", rest.ErrorResponse{}).
+		Returns(http.StatusUnauthorized, "Client authorization check failure", rest.ErrorResponse{}).
+		Returns(http.StatusConflict, "Request has duplicate value or contains invalid data", rest.ErrorResponse{}).
 		Returns(http.StatusNoContent, "Password set", nil))
 
 	restWS.Route(restWS.
@@ -211,14 +211,16 @@ func (restSrv *Server) getUser(req *restful.Request, resp *restful.Response) {
 	if err != nil {
 		log.WithContext(reqCtx).
 			Err(err).Msg("Request context")
-		resp.WriteHeaderAndJson(http.StatusInternalServerError, &rest.ErrorResponse{}, restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusInternalServerError)
 		return
 	}
 	authCtx := reqCtx.Authorization()
 	if authCtx.IsNotValid() {
 		log.WithContext(reqCtx).
 			Warn().Err(err).Msg("Unauthorized")
-		resp.WriteHeaderAndJson(http.StatusUnauthorized, &rest.ErrorResponse{}, restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusUnauthorized)
 		return
 	}
 
@@ -226,7 +228,8 @@ func (restSrv *Server) getUser(req *restful.Request, resp *restful.Response) {
 	if requestedUserIDStr == "" {
 		log.WithContext(reqCtx).
 			Warn().Msg("Invalid parameter value path.user-id: empty")
-		resp.WriteHeaderAndJson(http.StatusBadRequest, &rest.ErrorResponse{}, restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusBadRequest)
 		return
 	}
 
@@ -235,7 +238,8 @@ func (restSrv *Server) getUser(req *restful.Request, resp *restful.Response) {
 		if !reqCtx.IsUserContext() {
 			log.WithContext(reqCtx).
 				Warn().Msg("Invalid request: 'me' can only be used with user access token")
-			resp.WriteHeaderAndJson(http.StatusBadRequest, &rest.ErrorResponse{}, restful.MIME_JSON)
+			rest.RespondTo(resp).EmptyError(
+				http.StatusBadRequest)
 			return
 		}
 		requestedUserID = authCtx.UserID
@@ -244,8 +248,8 @@ func (restSrv *Server) getUser(req *restful.Request, resp *restful.Response) {
 		if err != nil {
 			log.WithContext(reqCtx).
 				Warn().Err(err).Msg("Invalid parameter value path.user-id")
-			resp.WriteHeaderAndJson(http.StatusBadRequest, &rest.ErrorResponse{},
-				restful.MIME_JSON)
+			rest.RespondTo(resp).EmptyError(
+				http.StatusBadRequest)
 			return
 		}
 	}
@@ -265,7 +269,8 @@ func (restSrv *Server) getUser(req *restful.Request, resp *restful.Response) {
 	if err != nil {
 		log.WithContext(reqCtx).
 			Err(err).Msg("User base profile fetch")
-		resp.WriteHeaderAndJson(http.StatusInternalServerError, &rest.ErrorResponse{}, restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusInternalServerError)
 		return
 	}
 
@@ -276,8 +281,8 @@ func (restSrv *Server) getUser(req *restful.Request, resp *restful.Response) {
 	if err != nil {
 		log.WithContext(reqCtx).
 			Err(err).Msg("User phone number fetch")
-		resp.WriteHeaderAndJson(http.StatusInternalServerError,
-			&rest.ErrorResponse{}, restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusInternalServerError)
 		return
 	}
 	if userPhoneNumber != nil {
@@ -291,8 +296,8 @@ func (restSrv *Server) getUser(req *restful.Request, resp *restful.Response) {
 	if err != nil {
 		log.WithContext(reqCtx).
 			Err(err).Msg("User email address fetch")
-		resp.WriteHeaderAndJson(http.StatusInternalServerError,
-			&rest.ErrorResponse{}, restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusInternalServerError)
 		return
 	}
 	if userEmailAddress != nil {
@@ -307,14 +312,16 @@ func (restSrv *Server) getUsersByPhoneNumbers(req *restful.Request, resp *restfu
 	if err != nil {
 		log.WithContext(reqCtx).
 			Err(err).Msg("Request context")
-		resp.WriteHeaderAndJson(http.StatusInternalServerError, &rest.ErrorResponse{}, restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusInternalServerError)
 		return
 	}
 	authCtx := reqCtx.Authorization()
 	if authCtx.IsNotValid() {
 		log.WithContext(reqCtx).
 			Warn().Err(err).Msg("Unauthorized")
-		resp.WriteHeaderAndJson(http.StatusUnauthorized, &rest.ErrorResponse{}, restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusUnauthorized)
 		return
 	}
 	//TODO: check permissions an such
@@ -324,13 +331,16 @@ func (restSrv *Server) getUsersByPhoneNumbers(req *restful.Request, resp *restfu
 	if len(phoneNumberStrList) == 0 {
 		log.WithContext(reqCtx).
 			Warn().Msg("Phone number list empty")
-		resp.WriteHeader(http.StatusBadRequest)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusBadRequest)
 		return
 	}
 	if len(phoneNumberStrList) > phoneNumberListLengthMax {
 		log.WithContext(reqCtx).
-			Warn().Msgf("Phone number list is too large at %d (max. %d)", len(phoneNumberStrList), phoneNumberListLengthMax)
-		resp.WriteHeader(http.StatusBadRequest)
+			Warn().Msgf(
+			"Phone number list is too large at %d (max. %d)", len(phoneNumberStrList), phoneNumberListLengthMax)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusBadRequest)
 		return
 	}
 
@@ -388,14 +398,16 @@ func (restSrv *Server) getUserContacts(req *restful.Request, resp *restful.Respo
 	if err != nil {
 		log.WithContext(reqCtx).
 			Err(err).Msg("Request context")
-		resp.WriteHeaderAndJson(http.StatusInternalServerError, &rest.ErrorResponse{}, restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusInternalServerError)
 		return
 	}
 	authCtx := reqCtx.Authorization()
 	if authCtx.IsNotValid() || !authCtx.IsUserContext() {
 		log.WithContext(reqCtx).
 			Warn().Err(err).Msg("Unauthorized")
-		resp.WriteHeaderAndJson(http.StatusUnauthorized, &rest.ErrorResponse{}, restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusUnauthorized)
 		return
 	}
 
@@ -408,7 +420,8 @@ func (restSrv *Server) getUserContacts(req *restful.Request, resp *restful.Respo
 	if err != nil {
 		log.WithContext(reqCtx).
 			Warn().Err(err).Msg("User contacts user ID fetch")
-		resp.WriteHeaderAndJson(http.StatusInternalServerError, &rest.ErrorResponse{}, restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusInternalServerError)
 		return
 	}
 	var userContactLists []iam.UserJSONV1

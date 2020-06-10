@@ -11,7 +11,6 @@ import (
 	"github.com/citadelium/foundation/pkg/api/oauth2"
 	"github.com/citadelium/foundation/pkg/api/rest"
 	"github.com/emicklei/go-restful"
-	"github.com/tomasen/realip"
 	"golang.org/x/text/language"
 
 	"github.com/citadelium/iam/pkg/iam"
@@ -127,8 +126,8 @@ func (restSrv *Server) postAuthorize(req *restful.Request, resp *restful.Respons
 	if !reqCtx.IsUserContext() {
 		log.WithContext(reqCtx).
 			Warn().Msgf("Unauthorized: %v", err)
-		resp.WriteHeaderAndJson(http.StatusUnauthorized, &rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusUnauthorized)
 		return
 	}
 
@@ -137,8 +136,8 @@ func (restSrv *Server) postAuthorize(req *restful.Request, resp *restful.Respons
 	if err != nil {
 		log.WithContext(reqCtx).
 			Warn().Msgf("Invalid field form.client_id %v: %v", clientIDArgVal, err)
-		resp.WriteHeaderAndJson(http.StatusBadRequest, &rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusBadRequest)
 		return
 	}
 
@@ -147,8 +146,8 @@ func (restSrv *Server) postAuthorize(req *restful.Request, resp *restful.Respons
 	if responseType != oauth2.ResponseTypeCode {
 		log.WithContext(reqCtx).
 			Warn().Msgf("Invalid field form.response_type %v: unexpected value", responseType)
-		resp.WriteHeaderAndJson(http.StatusBadRequest, &rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusBadRequest)
 		return
 	}
 
@@ -159,15 +158,15 @@ func (restSrv *Server) postAuthorize(req *restful.Request, resp *restful.Respons
 	if client == nil {
 		log.WithContext(reqCtx).
 			Warn().Msgf("Invalid client ID: %v", clientID)
-		resp.WriteHeaderAndJson(http.StatusBadRequest, &rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusBadRequest)
 		return
 	}
 	if !clientID.IsConfidential() && !clientID.IsUserAgent() {
 		log.WithContext(reqCtx).
 			Warn().Msgf("Invalid client type for ID %v", clientID)
-		resp.WriteHeaderAndJson(http.StatusBadRequest, &rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusBadRequest)
 		return
 	}
 
@@ -176,8 +175,8 @@ func (restSrv *Server) postAuthorize(req *restful.Request, resp *restful.Respons
 		log.WithContext(reqCtx).
 			Warn().Msgf("Redirect URI mismatch for client %v. Got %v , expecting %v .",
 			clientID, redirectURIStr, client.OAuth2RedirectURI)
-		resp.WriteHeaderAndJson(http.StatusBadRequest, &rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusBadRequest)
 		return
 	}
 
@@ -207,7 +206,7 @@ func (restSrv *Server) postAuthorize(req *restful.Request, resp *restful.Respons
 				CreationTime:       tNow,
 				CreationUserID:     authCtx.UserIDPtr(),
 				CreationTerminalID: authCtx.TerminalIDPtr(),
-				CreationIPAddress:  realip.FromRequest(req.Request),
+				CreationIPAddress:  reqCtx.RemoteAddress(),
 				CreationUserAgent:  strings.TrimSpace(req.Request.UserAgent()),
 				VerificationType:   iam.TerminalVerificationResourceTypeOAuthAuthorizationCode,
 				VerificationID:     0,
@@ -231,7 +230,7 @@ func (restSrv *Server) postAuthorize(req *restful.Request, resp *restful.Respons
 				CreationTime:       tNow,
 				CreationUserID:     authCtx.UserIDPtr(),
 				CreationTerminalID: authCtx.TerminalIDPtr(),
-				CreationIPAddress:  realip.FromRequest(req.Request),
+				CreationIPAddress:  reqCtx.RemoteAddress(),
 				CreationUserAgent:  strings.TrimSpace(req.Request.UserAgent()),
 				VerificationType:   iam.TerminalVerificationResourceTypeOAuthImplicit,
 				VerificationID:     0,
@@ -254,9 +253,10 @@ func (restSrv *Server) postAuthorize(req *restful.Request, resp *restful.Respons
 			}})
 	}
 
-	resp.WriteHeaderAndJson(http.StatusOK, &iam.OAuth2AuthorizePostResponse{
-		RedirectURI: redirectURI.String(),
-	}, restful.MIME_JSON)
+	rest.RespondTo(resp).Success(
+		&iam.OAuth2AuthorizePostResponse{
+			RedirectURI: redirectURI.String(),
+		})
 }
 
 // Parse preferred languages from request

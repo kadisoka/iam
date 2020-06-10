@@ -17,14 +17,16 @@ func (restSrv *Server) putUserPassword(req *restful.Request, resp *restful.Respo
 	if err != nil {
 		log.WithContext(reqCtx).
 			Err(err).Msg("Request context")
-		resp.WriteHeaderAndJson(http.StatusInternalServerError, &rest.ErrorResponse{}, restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusInternalServerError)
 		return
 	}
 	authCtx := reqCtx.Authorization()
 	if authCtx.IsNotValid() || !authCtx.IsUserContext() {
 		log.WithContext(reqCtx).
 			Warn().Err(err).Msg("Unauthorized")
-		resp.WriteHeaderAndJson(http.StatusUnauthorized, &rest.ErrorResponse{}, restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusUnauthorized)
 		return
 	}
 
@@ -33,7 +35,8 @@ func (restSrv *Server) putUserPassword(req *restful.Request, resp *restful.Respo
 	if err != nil {
 		log.WithContext(reqCtx).
 			Warn().Err(err).Msg("Request body parsing")
-		resp.WriteHeaderAndJson(http.StatusBadRequest, &rest.ErrorResponse{}, restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusBadRequest)
 		return
 	}
 
@@ -42,14 +45,16 @@ func (restSrv *Server) putUserPassword(req *restful.Request, resp *restful.Respo
 	if err != nil {
 		log.WithContext(reqCtx).
 			Err(err).Msg("Passwords matching")
-		resp.WriteHeaderAndJson(http.StatusInternalServerError, &rest.ErrorResponse{}, restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusInternalServerError)
 		return
 	}
 
 	if !matched {
 		log.WithContext(reqCtx).
 			Warn().Msg("Passwords mismatch")
-		resp.WriteHeaderAndJson(http.StatusBadRequest, &rest.ErrorResponse{}, restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusBadRequest)
 		return
 	}
 
@@ -57,8 +62,8 @@ func (restSrv *Server) putUserPassword(req *restful.Request, resp *restful.Respo
 	if password == "" {
 		log.WithContext(reqCtx).
 			Warn().Msg("Password empty")
-		resp.WriteHeaderAndJson(http.StatusBadRequest,
-			&rest.ErrorResponse{}, restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusBadRequest)
 		return
 	}
 
@@ -67,10 +72,10 @@ func (restSrv *Server) putUserPassword(req *restful.Request, resp *restful.Respo
 	if err != nil {
 		log.WithContext(reqCtx).
 			Err(err).Msg("User password update")
-		resp.WriteHeaderAndJson(http.StatusInternalServerError,
-			&rest.ErrorResponse{}, restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusInternalServerError)
 		return
 	}
 
-	resp.WriteHeader(http.StatusNoContent)
+	rest.RespondTo(resp).Success(nil)
 }

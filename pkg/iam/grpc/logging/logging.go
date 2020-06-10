@@ -4,7 +4,6 @@ import (
 	"github.com/citadelium/foundation/pkg/api"
 	citadellog "github.com/citadelium/foundation/pkg/logging"
 	"google.golang.org/grpc"
-	grpcPeer "google.golang.org/grpc/peer"
 
 	"github.com/citadelium/iam/pkg/iam"
 )
@@ -47,10 +46,8 @@ func (logger Logger) WithContext(
 		}
 	}
 	if !hasAuth {
-		if peer, _ := grpcPeer.FromContext(ctx); peer != nil {
-			logCtx = logCtx.
-				Str("remote_ip", peer.Addr.String())
-		}
+		logCtx = logCtx.
+			Str("remote_addr", ctx.RemoteAddress())
 	}
 	if method, ok := grpc.Method(ctx); ok {
 		logCtx = logCtx.

@@ -18,13 +18,15 @@ func (restSrv *Server) putUserPhoneNumber(
 	reqCtx, err := restSrv.RESTRequestContext(req.Request)
 	if err != nil {
 		log.WithContext(reqCtx).Error().Msgf("Request context: %v", err)
-		resp.WriteHeaderAndJson(http.StatusInternalServerError, &rest.ErrorResponse{}, restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusInternalServerError)
 		return
 	}
 	authCtx := reqCtx.Authorization()
 	if authCtx.IsNotValid() && !authCtx.IsUserContext() {
 		log.WithContext(reqCtx).Warn().Msgf("Unauthorized: %v", err)
-		resp.WriteHeaderAndJson(http.StatusUnauthorized, &rest.ErrorResponse{}, restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusUnauthorized)
 		return
 	}
 
@@ -36,15 +38,15 @@ func (restSrv *Server) putUserPhoneNumber(
 		log.WithContext(reqCtx).
 			Warn().Msgf("Unable to parse %q as phone number: %v",
 			reqEntity.PhoneNumber, err)
-		resp.WriteHeaderAndJson(http.StatusBadRequest, &rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusBadRequest)
 		return
 	}
 	if !phoneNumber.IsValid() {
 		log.WithContext(reqCtx).
 			Warn().Msgf("Provided phone number %q is invalid", reqEntity.PhoneNumber)
-		resp.WriteHeaderAndJson(http.StatusBadRequest, &rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusBadRequest)
 		return
 	}
 
@@ -64,28 +66,29 @@ func (restSrv *Server) putUserPhoneNumber(
 			log.WithContext(reqCtx).
 				Warn().Msgf("SetUserPrimaryPhoneNumber to %v: %v",
 				phoneNumber, err)
-			resp.WriteHeaderAndJson(http.StatusBadRequest,
-				rest.ErrorResponse{}, restful.MIME_JSON)
+			rest.RespondTo(resp).EmptyError(
+				http.StatusBadRequest)
 			return
 		}
 		log.WithContext(reqCtx).
 			Error().Msgf("SetUserPrimaryPhoneNumber to %v: %v",
 			phoneNumber, err)
-		resp.WriteHeader(http.StatusInternalServerError)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusInternalServerError)
 		return
 	}
 
 	if verificationID == 0 {
-		resp.WriteHeader(http.StatusNoContent)
+		rest.RespondTo(resp).Success(nil)
 		return
 	}
 
-	resp.WriteHeaderAndJson(http.StatusAccepted,
+	rest.RespondTo(resp).SuccessWithHTTPStatusCode(
 		&UserPhoneNumberPutResponse{
 			VerificationID: verificationID,
 			CodeExpiry:     *codeExpiry,
 		},
-		restful.MIME_JSON)
+		http.StatusAccepted)
 	return
 }
 
@@ -97,8 +100,8 @@ func (restSrv *Server) postUserPhoneNumberVerificationConfirmation(
 	if !reqCtx.IsUserContext() {
 		log.WithContext(reqCtx).
 			Warn().Msgf("Unauthorized: %v", err)
-		resp.WriteHeaderAndJson(http.StatusUnauthorized, &rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusUnauthorized)
 		return
 	}
 
@@ -107,8 +110,8 @@ func (restSrv *Server) postUserPhoneNumberVerificationConfirmation(
 	if err != nil {
 		log.WithContext(reqCtx).
 			Warn().Msgf("Unable to load request content: %v", err)
-		resp.WriteHeaderAndJson(http.StatusBadRequest, &rest.ErrorResponse{},
-			restful.MIME_JSON)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusBadRequest)
 		return
 	}
 
@@ -120,23 +123,25 @@ func (restSrv *Server) postUserPhoneNumberVerificationConfirmation(
 			log.WithContext(reqCtx).
 				Warn().Msgf("ConfirmUserPhoneNumberVerification %v failed: %v",
 				reqEntity.VerificationID, err)
-			resp.WriteHeaderAndJson(http.StatusBadRequest,
-				&rest.ErrorResponse{}, restful.MIME_JSON)
+			rest.RespondTo(resp).EmptyError(
+				http.StatusBadRequest)
 			return
 		}
 		log.WithContext(reqCtx).
 			Error().Msgf("ConfirmUserPhoneNumberVerification %v failed: %v",
 			reqEntity.VerificationID, err)
-		resp.WriteHeader(http.StatusInternalServerError)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusInternalServerError)
 		return
 	}
 
 	if !updated {
-		resp.WriteHeader(http.StatusGone)
+		rest.RespondTo(resp).EmptyError(
+			http.StatusGone)
 		return
 	}
 
-	resp.WriteHeader(http.StatusNoContent)
+	rest.RespondTo(resp).Success(nil)
 }
 
 type UserPhoneNumberPutRequest struct {

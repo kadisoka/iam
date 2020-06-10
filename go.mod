@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/aws/aws-sdk-go v1.31.14
-	github.com/citadelium/foundation v0.0.0-20200609184002-e7f4d9ea759f
+	github.com/citadelium/foundation v0.0.0-20200610163958-cd83222de26a
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/emicklei/go-restful v2.12.0+incompatible
 	github.com/emicklei/go-restful-openapi v1.3.0
