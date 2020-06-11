@@ -46,6 +46,7 @@ func initApp() (app.App, error) {
 		WebUI: &srvwebui.ServerConfig{
 			Server: webui.ServerConfig{
 				ServePort: 8080,
+				FilesDir:  "./resources/iam-webui",
 			},
 		},
 		// REST API

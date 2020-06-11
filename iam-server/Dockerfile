@@ -22,9 +22,8 @@ FROM alpine:3.11
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 
-COPY ./iam-server/resources/swagger-ui ./resources/swagger-ui
+COPY ./iam-server/resources ./resources
 COPY ./pkg/iamserver/eav10n/resources ./github.com/citadelium/iam/pkg/iamserver/eav10n/resources
-COPY ./pkg/iamserver/webui/resources ./github.com/citadelium/iam/pkg/iamserver/webui/resources
 
 COPY --from=builder /workspace/iam/bin/iam-server ./service
 
