@@ -13,9 +13,9 @@ ARG revisionID=unknown
 ARG buildTimestamp=unknown
 
 # ...and build it.
-RUN CGO_ENABLED=0 go build -o ./iam/bin/monolith \
+RUN CGO_ENABLED=0 go build -o ./iam/bin/microservices \
     -ldflags="-s -w -X main.revisionID=${revisionID} -X main.buildTimestamp=${buildTimestamp}" \
-    ./examples/monolith
+    ./examples/microservices
 
 # Build the runtime image
 FROM alpine:3.11
@@ -25,10 +25,7 @@ WORKDIR /root/
 # Include resources required by IAM server
 COPY ./iam-server/resources ./resources
 
-# Include our service's resources
-COPY ./examples/monolith/resources/monolith-webui ./resources/monolith-webui
-
-COPY --from=builder /workspace/iam/bin/monolith ./service
+COPY --from=builder /workspace/iam/bin/microservices ./service
 
 # HTTP
 EXPOSE 8080

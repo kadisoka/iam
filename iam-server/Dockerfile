@@ -22,6 +22,7 @@ FROM alpine:3.11
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 
+# Include resources required by IAM server
 COPY ./iam-server/resources ./resources
 
 COPY --from=builder /workspace/iam/bin/iam-server ./service

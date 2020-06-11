@@ -6,7 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"encoding/json"
-	"errors"
+	"fmt"
 	"math/big"
 	"net/http"
 
@@ -46,7 +46,7 @@ func GetPublicKeysFromSetByURL(url string) (map[string]*rsa.PublicKey, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return nil, errors.New("fetch failed")
+		return nil, fmt.Errorf("fetch failed with code %v url %v", resp.StatusCode, url)
 	}
 
 	var set Set
