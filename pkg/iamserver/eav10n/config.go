@@ -18,10 +18,11 @@ func init() {
 }
 
 type Config struct {
-	CodeTTLDefault time.Duration `env:"CODE_TTL_DEFAULT"`
-	SenderAddress  string        `env:"SENDER_ADDRESS"`
-	ResourcesDir   string        `env:"RESOURCES_DIR"`
-	SES            *SESConfig    `env:"SES"`
+	CodeTTLDefault          time.Duration `env:"CODE_TTL_DEFAULT"`
+	SenderAddress           string        `env:"SENDER_ADDRESS"`
+	ResourcesDir            string        `env:"RESOURCES_DIR"`
+	ConfirmationAttemptsMax int16         `env:"CONFIRMATION_ATTEMPTS_MAX"`
+	SES                     *SESConfig    `env:"SES"`
 }
 
 func ConfigFromEnv(prefix string) (*Config, error) {

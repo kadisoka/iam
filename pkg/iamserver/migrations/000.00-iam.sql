@@ -109,8 +109,8 @@ CREATE TABLE phone_number_verifications (
     code                     text NOT NULL,
     code_expiry              timestamp with time zone,
     creation_time            timestamp with time zone NOT NULL DEFAULT now(),
-    creation_user_id         bigint NOT NULL,
-    creation_terminal_id     bigint NOT NULL,
+    creation_user_id         bigint,
+    creation_terminal_id     bigint,
     confirmation_time        timestamp with time zone,
     confirmation_user_id     bigint,
     confirmation_terminal_id bigint
@@ -194,9 +194,10 @@ CREATE TABLE email_address_verifications (
     domain_part              text NOT NULL,
     code                     text NOT NULL,
     code_expiry              timestamp with time zone,
+    attempts_remaining       smallint NOT NULL DEFAULT 3,
     creation_time            timestamp with time zone NOT NULL DEFAULT now(),
-    creation_user_id         bigint NOT NULL,
-    creation_terminal_id     bigint NOT NULL,
+    creation_user_id         bigint,
+    creation_terminal_id     bigint,
     confirmation_time        timestamp with time zone,
     confirmation_user_id     bigint,
     confirmation_terminal_id bigint

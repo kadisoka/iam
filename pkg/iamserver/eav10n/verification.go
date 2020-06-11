@@ -22,12 +22,13 @@ func VerificationMethodFromString(str string) VerificationMethod {
 }
 
 //TODO: make this private
-type Verification struct {
+type verificationDBModel struct {
 	ID                     int64           `db:"id"`
 	Local                  string          `db:"local_part"`
 	Domain                 string          `db:"domain_part"`
 	Code                   string          `db:"code"`
 	CodeExpiry             *time.Time      `db:"code_expiry"`
+	AttemptsRemaining      int16           `db:"attempts_remaining"`
 	CreationTime           time.Time       `db:"creation_time"`
 	CreationUserID         iam.UserID      `db:"creation_user_id"`
 	CreationTerminalID     iam.TerminalID  `db:"creation_terminal_id"`

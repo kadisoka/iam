@@ -186,7 +186,7 @@ func (verifier *Verifier) ConfirmVerification(
 	}
 	authCtx := callCtx.Authorization()
 
-	var verificationModel Verification
+	var verificationModel verificationDBModel
 	tNow := time.Now().UTC()
 
 	err := verifier.db.QueryRowx(

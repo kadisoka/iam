@@ -25,7 +25,7 @@ func VerificationMethodFromString(str string) VerificationMethod {
 }
 
 //TODO: make this private
-type Verification struct {
+type verificationDBModel struct {
 	ID                     int64           `db:"id"`
 	CountryCode            int32           `db:"country_code"`
 	NationalNumber         int64           `db:"national_number"`

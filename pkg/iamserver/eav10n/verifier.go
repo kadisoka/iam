@@ -74,21 +74,28 @@ func NewVerifier(
 		codeTTLDefault = 15 * time.Minute //TODO: should be based on the length of the code
 	}
 
+	confirmationAttemptsMax := config.ConfirmationAttemptsMax
+	if confirmationAttemptsMax == 0 {
+		confirmationAttemptsMax = 5
+	}
+
 	return &Verifier{
-		appInfo:        appInfo,
-		db:             db,
-		senderAddress:  config.SenderAddress,
-		sesClient:      svc,
-		codeTTLDefault: codeTTLDefault,
+		appInfo:                 appInfo,
+		db:                      db,
+		senderAddress:           config.SenderAddress,
+		sesClient:               svc,
+		codeTTLDefault:          codeTTLDefault,
+		confirmationAttemptsMax: confirmationAttemptsMax,
 	}
 }
 
 type Verifier struct {
-	appInfo        app.Info
-	db             *sqlx.DB
-	senderAddress  string
-	sesClient      *ses.SES
-	codeTTLDefault time.Duration
+	appInfo                 app.Info
+	db                      *sqlx.DB
+	senderAddress           string
+	sesClient               *ses.SES
+	codeTTLDefault          time.Duration
+	confirmationAttemptsMax int16
 }
 
 func (verifier *Verifier) StartVerification(
@@ -106,21 +113,22 @@ func (verifier *Verifier) StartVerification(
 	tNow := time.Now().UTC()
 
 	//TODO(exa): prone to race-condition
+	var prevAttempts int16
 	var prevVerificationID int64
 	var prevCodeExpiry time.Time
 	err = verifier.db.
 		QueryRow(
-			"SELECT id, code_expiry "+
+			"SELECT id, code_expiry, attempts_remaining "+
 				"FROM email_address_verifications "+
 				"WHERE local_part = $1 AND domain_part = $2 AND confirmation_time IS NULL "+
 				"ORDER BY id DESC "+
 				"LIMIT 1",
 			emailAddress.LocalPart(),
 			emailAddress.DomainPart()).
-		Scan(&prevVerificationID, &prevCodeExpiry)
+		Scan(&prevVerificationID, &prevCodeExpiry, &prevAttempts)
 	if err == nil {
 		// Return previous verification code
-		if prevCodeExpiry.After(tNow.Add(-10 * time.Second)) {
+		if prevAttempts > 0 && prevCodeExpiry.After(tNow.Add(-10*time.Second)) {
 			return prevVerificationID, &prevCodeExpiry, nil
 		}
 	}
@@ -138,16 +146,17 @@ func (verifier *Verifier) StartVerification(
 	err = verifier.db.
 		QueryRow(
 			`INSERT INTO email_address_verifications `+
-				`(local_part, domain_part, code, code_expiry, creation_time, creation_user_id, creation_terminal_id) `+
-				`VALUES ($1, $2, $3, $4, $5, $6, $7) `+
+				`(local_part, domain_part, code, code_expiry, attempts_remaining, creation_time, creation_user_id, creation_terminal_id) `+
+				`VALUES ($1, $2, $3, $4, $5, $6, $7, $8) `+
 				`RETURNING id`,
 			emailAddress.LocalPart(),
 			emailAddress.DomainPart(),
 			code,
 			codeExp,
+			verifier.confirmationAttemptsMax,
 			tNow,
-			authCtx.UserID,
-			authCtx.TerminalID(),
+			authCtx.UserIDPtr(),
+			authCtx.TerminalIDPtr(),
 		).Scan(&id)
 	if err != nil {
 		return 0, nil, err
@@ -183,27 +192,32 @@ func (verifier *Verifier) ConfirmVerification(
 	}
 	authCtx := callCtx.Authorization()
 
-	var verificationModel Verification
+	var dbData verificationDBModel
 	tNow := time.Now().UTC()
 
 	err := verifier.db.QueryRowx(
-		`SELECT * `+
-			`FROM email_address_verifications `+
-			`WHERE id = $1 LIMIT 1 `,
+		`UPDATE email_address_verifications `+
+			`SET attempts_remaining = attempts_remaining - 1 `+
+			`WHERE id = $1 `+
+			`RETURNING *`,
 		verificationID).
-		StructScan(&verificationModel)
+		StructScan(&dbData)
 	if err != nil {
 		return err
 	}
 
-	if verificationModel.Code != code {
+	if dbData.AttemptsRemaining < 0 {
+		return ErrVerificationCodeExpired
+	}
+	if dbData.Code != code {
+		//TODO: if delay based on the number of attempts
 		return ErrVerificationCodeMismatch
 	}
-	if verificationModel.CodeExpiry != nil && verificationModel.CodeExpiry.Before(tNow) {
+	if dbData.CodeExpiry != nil && dbData.CodeExpiry.Before(tNow) {
 		return ErrVerificationCodeExpired
 	}
 
-	if verificationModel.ConfirmationTime != nil {
+	if dbData.ConfirmationTime != nil {
 		return nil
 	}
 
