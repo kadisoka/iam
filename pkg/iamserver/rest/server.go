@@ -23,10 +23,15 @@ import (
 const ServerLatestVersionString = "v1"
 
 type ServerConfig struct {
-	ServePort    int             `env:"SERVE_PORT"`
-	ServePath    string          `env:"SERVE_PATH"`
-	SwaggerUIDir string          `env:"SWAGGER_UI_DIR"`
-	V1           *ServerV1Config `env:"V1"`
+	ServePort int    `env:"SERVE_PORT"`
+	ServePath string `env:"SERVE_PATH"`
+
+	// SwaggerUIDir provides information where the Swagger UI files are
+	// located. If left empty, the service won't server the Swagger UI.
+	SwaggerUIDir string `env:"SWAGGER_UI_DIR"`
+
+	// V1 contains configuration for version 1 of the API service
+	V1 *ServerV1Config `env:"V1"`
 }
 
 type ServerV1Config struct {

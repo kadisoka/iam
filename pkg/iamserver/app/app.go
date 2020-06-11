@@ -134,6 +134,9 @@ func newWithoutServices(appCfg Config) (*App, error) {
 		return nil, errors.Wrap("app initialization", err)
 	}
 
+	if appCfg.Core.EAV.ResourcesDir == "" {
+		appCfg.Core.EAV.ResourcesDir = "./resources/iam-pnv10n-resources"
+	}
 	srvCore, err := iamserver.NewCoreByConfig(appCfg.Core, appCore)
 	if err != nil {
 		return nil, errors.Wrap("core initialization", err)
@@ -156,7 +159,7 @@ func resolveConfig(cfg *Config) {
 	}
 	cfg.WebUI.Server.ServePath = strings.TrimRight(cfg.WebUI.Server.ServePath, "/") + "/"
 	if cfg.WebUI.Server.FilesDir == "" {
-		cfg.WebUI.Server.FilesDir = iamwebui.ResourcesDirDefault
+		cfg.WebUI.Server.FilesDir = "./resources/iam-webui"
 	}
 	if cfg.WebUI.URLs.Login == "" {
 		cfg.WebUI.URLs.Login = cfg.WebUI.Server.ServePath + "signin"
