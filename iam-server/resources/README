@@ -1,0 +1,7 @@
+This folder contains resources required to run the server. These files need
+to be present when the server is started. In the default build, these files
+are copied into the Docker image.
+
+In applications, you can just copy this folder and put at the appropriate
+path. Other option is to pull directly from their sources using the provided
+scripts found in this folder.
