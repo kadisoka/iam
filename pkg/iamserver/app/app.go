@@ -96,7 +96,7 @@ func setUpWebUIServer(srvApp *App, cfg Config) (*webui.Server, error) {
 		Old: "/citadel-iam-webui-base-path/",
 		New: webUICfg.ServePath,
 	}
-	defaultURLReplacer := &webui.StringReplacer{
+	homeURLReplacer := &webui.StringReplacer{
 		Old: "http://localhost:3000/",
 		New: "/",
 	}
@@ -108,14 +108,14 @@ func setUpWebUIServer(srvApp *App, cfg Config) (*webui.Server, error) {
 				TemplateDelimEnd:   "]:}",
 			},
 			TemplateData: templateData,
-		}, restAPIURLReplacer, webUIServeURLReplacer, defaultURLReplacer},
+		}, restAPIURLReplacer, webUIServeURLReplacer, homeURLReplacer},
 		"*.js": {&webui.JSRenderer{
 			Config: webui.JSRendererConfig{
 				TemplateDelimBegin: "{:[",
 				TemplateDelimEnd:   "]:}",
 			},
 			TemplateData: templateData,
-		}, restAPIURLReplacer, webUIServeURLReplacer, defaultURLReplacer},
+		}, restAPIURLReplacer, webUIServeURLReplacer, homeURLReplacer},
 	}
 
 	webUIServer, err := webui.NewServer(
@@ -134,9 +134,6 @@ func newWithoutServices(appCfg Config) (*App, error) {
 		return nil, errors.Wrap("app initialization", err)
 	}
 
-	if appCfg.Core.EAV.ResourcesDir == "" {
-		appCfg.Core.EAV.ResourcesDir = "./resources/iam-pnv10n-resources"
-	}
 	srvCore, err := iamserver.NewCoreByConfig(appCfg.Core, appCore)
 	if err != nil {
 		return nil, errors.Wrap("core initialization", err)
@@ -159,7 +156,7 @@ func resolveConfig(cfg *Config) {
 	}
 	cfg.WebUI.Server.ServePath = strings.TrimRight(cfg.WebUI.Server.ServePath, "/") + "/"
 	if cfg.WebUI.Server.FilesDir == "" {
-		cfg.WebUI.Server.FilesDir = "./resources/iam-webui"
+		cfg.WebUI.Server.FilesDir = "resources/iam-webui"
 	}
 	if cfg.WebUI.URLs.Login == "" {
 		cfg.WebUI.URLs.Login = cfg.WebUI.Server.ServePath + "signin"
@@ -173,6 +170,10 @@ func resolveConfig(cfg *Config) {
 	}
 	if cfg.RESTCanonicalBaseURL == "" {
 		cfg.RESTCanonicalBaseURL = cfg.REST.ServePath + rest.ServerLatestVersionString + "/"
+	}
+
+	if cfg.Core.EAV.ResourcesDir == "" {
+		cfg.Core.EAV.ResourcesDir = "resources/iam-pnv10n-resources"
 	}
 }
 

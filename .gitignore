@@ -1,6 +1,2 @@
 
 .DS_Store
-
-/iam-server/.cache
-/iam-server/var
-/iam-server/etc/secrets

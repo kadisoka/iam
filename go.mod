@@ -3,8 +3,8 @@ module github.com/citadelium/iam
 go 1.14
 
 require (
-	github.com/aws/aws-sdk-go v1.31.14
-	github.com/citadelium/foundation v0.0.0-20200610163958-cd83222de26a
+	github.com/aws/aws-sdk-go v1.31.15
+	github.com/citadelium/foundation v0.0.0-20200611182854-a1450919ac44
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/emicklei/go-restful v2.12.0+incompatible
 	github.com/emicklei/go-restful-openapi v1.3.0
