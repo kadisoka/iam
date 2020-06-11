@@ -108,7 +108,6 @@ type Verifier struct {
 	smsDeliveryServices     map[int32]SMSDeliveryService
 }
 
-//TODO: prefered method of verification (sms, phone call)
 //TODO(exa): make the operations atomic
 func (verifier *Verifier) StartVerification(
 	callCtx iam.CallContext,

@@ -12,7 +12,6 @@ import (
 	"github.com/citadelium/iam/pkg/iam"
 )
 
-//TODO: rate limit and/or tries limit.
 func (restSrv *Server) handleTokenRequestByAuthorizationCodeGrant(
 	req *restful.Request, resp *restful.Response,
 ) {
@@ -179,7 +178,7 @@ func (restSrv *Server) handleTokenRequestByAuthorizationCodeGrant(
 			TokenResponse: oauth2.TokenResponse{
 				AccessToken:  accessToken,
 				TokenType:    oauth2.TokenTypeBearer,
-				ExpiresIn:    iam.AccessTokenTTLInSeconds,
+				ExpiresIn:    iam.AccessTokenTTLDefaultInSeconds,
 				RefreshToken: refreshToken,
 			},
 			UserID:         userID.String(),

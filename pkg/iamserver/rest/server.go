@@ -27,7 +27,7 @@ type ServerConfig struct {
 	ServePath string `env:"SERVE_PATH"`
 
 	// SwaggerUIDir provides information where the Swagger UI files are
-	// located. If left empty, the service won't server the Swagger UI.
+	// located. If left empty, the server won't serve the Swagger UI.
 	SwaggerUIDir string `env:"SWAGGER_UI_DIR"`
 
 	// V1 contains configuration for version 1 of the API service

@@ -2,7 +2,7 @@ package logging
 
 import (
 	"github.com/citadelium/foundation/pkg/api"
-	citadellog "github.com/citadelium/foundation/pkg/logging"
+	foundationlog "github.com/citadelium/foundation/pkg/logging"
 	"google.golang.org/grpc"
 
 	"github.com/citadelium/iam/pkg/iam"
@@ -12,12 +12,12 @@ import (
 // automatically adds the name of the package where this function was called,
 // not when logging.
 func NewPkgLogger() Logger {
-	return Logger{PkgLogger: citadellog.NewPkgLoggerInternal(citadellog.CallerPkgName())}
+	return Logger{PkgLogger: foundationlog.NewPkgLoggerInternal(foundationlog.CallerPkgName())}
 }
 
 // Logger wraps other logger to provide additional functionalities.
 type Logger struct {
-	citadellog.PkgLogger
+	foundationlog.PkgLogger
 }
 
 // WithContext creates a new logger which bound to a CallContext.
@@ -25,7 +25,7 @@ type Logger struct {
 //TODO: don't populate the entry before the actual logging call.
 func (logger Logger) WithContext(
 	ctx api.CallContext,
-) *citadellog.Logger {
+) *foundationlog.Logger {
 	// Implementation notes: don't panic
 
 	if ctx == nil {

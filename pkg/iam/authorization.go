@@ -127,12 +127,12 @@ func (authCtx *Authorization) RawToken() string {
 }
 
 const (
-	// AccessTokenTTL is the active duration for an access token.
+	// AccessTokenTTLDefault is the active duration for an access token.
 	//
 	// We might want to make this configurable.
-	AccessTokenTTL = 1 * time.Hour
-	// AccessTokenTTLInSeconds is a shortcut to get AccessTokenTTL in seconds.
-	AccessTokenTTLInSeconds = int64(AccessTokenTTL / time.Second)
+	AccessTokenTTLDefault = 20 * time.Minute
+	// AccessTokenTTLDefaultInSeconds is a shortcut to get AccessTokenTTLDefault in seconds.
+	AccessTokenTTLDefaultInSeconds = int64(AccessTokenTTLDefault / time.Second)
 )
 
 type AccessTokenClaims struct {
@@ -143,10 +143,10 @@ type AccessTokenClaims struct {
 	TerminalID      string `json:"terminal_id,omitempty"`
 }
 
-// RefreshTokenTTL is the active duration for a refresh token.
+// RefreshTokenTTLDefault is the active duration for a refresh token.
 //
 // We might want to make this configurable.
-const RefreshTokenTTL = 30 * 24 * time.Hour
+const RefreshTokenTTLDefault = 30 * 24 * time.Hour
 
 type RefreshTokenClaims struct {
 	ExpiresAt      int64  `json:"exp,omitempty"`

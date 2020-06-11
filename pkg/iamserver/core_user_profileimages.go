@@ -16,7 +16,7 @@ type ProfileImageFile interface {
 	io.Seeker
 }
 
-func (core *Core) UpdateUserProfileImageByFile(
+func (core *Core) SetUserProfileImageByFile(
 	callCtx iam.CallContext,
 	userID iam.UserID,
 	imageFile ProfileImageFile,
@@ -51,7 +51,7 @@ func (core *Core) UpdateUserProfileImageByFile(
 		return "", errors.Wrap("file store", err)
 	}
 
-	err = core.UpdateUserProfileImageURL(callCtx, userID, publicURL)
+	err = core.SetUserProfileImageURL(callCtx, userID, publicURL)
 	if err != nil {
 		return "", errors.Wrap("user profile image URL update", err)
 	}

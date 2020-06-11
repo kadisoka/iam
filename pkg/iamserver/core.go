@@ -124,13 +124,13 @@ func NewCoreByConfig(coreCfg CoreConfig, appApp app.App) (*Core, error) {
 	return inst, nil
 }
 
-func (iamServerCore *Core) IsTestPhoneNumber(phoneNumber iam.PhoneNumber) bool {
+func (core *Core) IsTestPhoneNumber(phoneNumber iam.PhoneNumber) bool {
 	return phoneNumber.CountryCode() == 1 &&
 		phoneNumber.NationalNumber() > 5550000 &&
 		phoneNumber.NationalNumber() <= 5559999
 }
 
-func (iamServerCore *Core) IsTestEmailAddress(emailAddress iam.EmailAddress) bool {
+func (core *Core) IsTestEmailAddress(emailAddress iam.EmailAddress) bool {
 	return false
 }
 

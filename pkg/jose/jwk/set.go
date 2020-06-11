@@ -7,7 +7,6 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"math/big"
 	"net/http"
 
@@ -45,19 +44,13 @@ func GetPublicKeysFromSetByURL(url string) (map[string]*rsa.PublicKey, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	//TODO: check status code etc.
-	if resp.StatusCode < 200 && resp.StatusCode > 299 {
+
+	if resp.StatusCode != 200 {
 		return nil, errors.New("fetch failed")
 	}
 
-	//TODO: decode directly from the body (stream)
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
 	var set Set
-	err = json.Unmarshal(body, &set)
+	err = json.NewDecoder(resp.Body).Decode(&set)
 	if err != nil {
 		return nil, err
 	}

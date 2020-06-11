@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/citadelium/foundation/pkg/api/rest"
-	citadellog "github.com/citadelium/foundation/pkg/logging"
+	foundationlog "github.com/citadelium/foundation/pkg/logging"
 	"github.com/tomasen/realip"
 
 	"github.com/citadelium/iam/pkg/iam"
@@ -14,12 +14,12 @@ import (
 // automatically adds the name of the package where this function was called,
 // not when logging.
 func NewPkgLogger() Logger {
-	return Logger{PkgLogger: citadellog.NewPkgLoggerInternal(citadellog.CallerPkgName())}
+	return Logger{PkgLogger: foundationlog.NewPkgLoggerInternal(foundationlog.CallerPkgName())}
 }
 
 // Logger wraps other logger to provide additional functionalities.
 type Logger struct {
-	citadellog.PkgLogger
+	foundationlog.PkgLogger
 }
 
 // WithContext creates a new logger which bound to a RequestContext.
@@ -27,7 +27,7 @@ type Logger struct {
 //TODO: don't populate the entry before the actual logging call.
 func (logger Logger) WithContext(
 	ctx rest.RequestContext,
-) *citadellog.Logger {
+) *foundationlog.Logger {
 	// Implementation notes: don't panic
 
 	if ctx == nil {
@@ -74,7 +74,7 @@ func (logger Logger) WithContext(
 // WithRequest creates a log entry with some fields from the request.
 func (logger Logger) WithRequest(
 	req *http.Request,
-) *citadellog.Logger {
+) *foundationlog.Logger {
 	// Implementation notes: don't panic
 
 	if req == nil {

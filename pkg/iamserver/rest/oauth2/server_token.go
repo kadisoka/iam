@@ -44,7 +44,12 @@ func (restSrv *Server) postToken(req *restful.Request, resp *restful.Response) {
 		restSrv.handleTokenRequestByClientCredentials(req, resp)
 		return
 	case oauth2.GrantTypePassword:
-		restSrv.handleTokenRequestByPasswordGrant(req, resp)
+		// Note: we are currently disabling this grant type until we have
+		// implemented rate limiter for handleTokenRequestByPasswordGrant
+		log.WithRequest(req.Request).
+			Warn().Msgf("Grant type is currently disabled: %v", grantType)
+		oauth2.RespondTo(resp).ErrorCode(
+			oauth2.ErrorUnsupportedGrantType)
 		return
 	case oauth2.GrantTypeRefreshToken:
 		//TODO: our refresh tokens are JWT which claims structure can be found

@@ -116,7 +116,6 @@ func UseClientIDV0Enconding() {
 	})
 }
 
-//TODO: OAuth spec mentioned about confidential client type. Find out more about it.
 type clientType string
 
 func (clientTyp clientType) String() string { return string(clientTyp) }

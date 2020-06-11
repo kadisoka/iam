@@ -281,7 +281,7 @@ func (core *Core) UpdateUserProfile(
 	return updated, nil
 }
 
-func (core *Core) UpdateUserProfileImageURL(
+func (core *Core) SetUserProfileImageURL(
 	callCtx iam.CallContext,
 	userID iam.UserID,
 	profileImageURL string,

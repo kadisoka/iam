@@ -99,7 +99,6 @@ func (restSrv *Server) RestfulWebService() *restful.WebService {
 	return restWS
 }
 
-//TODO: rate limit
 func (restSrv *Server) postTerminalsRegister(
 	req *restful.Request, resp *restful.Response,
 ) {
@@ -108,7 +107,6 @@ func (restSrv *Server) postTerminalsRegister(
 	if err != nil {
 		log.WithRequest(req.Request).
 			Warn().Err(err).Msg("Client authentication")
-		// RFC 6749 § 5.2
 		realmName := restSrv.serverCore.RealmName()
 		if realmName == "" {
 			realmName = "Restricted"

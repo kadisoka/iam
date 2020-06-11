@@ -11,7 +11,6 @@ import (
 	"github.com/citadelium/iam/pkg/iam"
 )
 
-//TODO: rate limit
 func (restSrv *Server) handleTokenRequestByPasswordGrant(
 	req *restful.Request, resp *restful.Response,
 ) {
@@ -26,7 +25,13 @@ func (restSrv *Server) handleTokenRequestByPasswordGrant(
 		return
 	}
 
-	//TODO: check if the client is allowed to use this grant type
+	if reqClient != nil && reqClient.ID.IsValid() && (!reqClient.ID.IsUserAgent() || !reqClient.ID.IsConfidential()) {
+		log.WithRequest(req.Request).
+			Warn().Msgf("Client %v is not authorized to use grant type password", reqClient.ID)
+		oauth2.RespondTo(resp).ErrorCode(
+			oauth2.ErrorUnauthorizedClient)
+		return
+	}
 
 	reqCtx, err := restSrv.RESTRequestContext(req.Request)
 	if err != nil && err != iam.ErrReqFieldAuthorizationTypeUnsupported {
@@ -157,7 +162,7 @@ func (restSrv *Server) handleTokenRequestByPasswordGrantWithTerminalCreds(
 			TokenResponse: oauth2.TokenResponse{
 				AccessToken:  accessToken,
 				TokenType:    oauth2.TokenTypeBearer,
-				ExpiresIn:    iam.AccessTokenTTLInSeconds,
+				ExpiresIn:    iam.AccessTokenTTLDefaultInSeconds,
 				RefreshToken: refreshToken,
 			},
 			UserID: userID.String(),

@@ -42,7 +42,7 @@ func (core *Core) GenerateAccessTokenJWT(
 			Id:        authID.String(),
 			IssuedAt:  issueTime.Unix(),
 			Issuer:    core.RealmName(),
-			ExpiresAt: issueTime.Add(iam.AccessTokenTTL).Unix(),
+			ExpiresAt: issueTime.Add(iam.AccessTokenTTLDefault).Unix(),
 			Subject:   userID.String(),
 		},
 		AuthorizedParty: terminalID.ClientID().String(),
@@ -72,7 +72,7 @@ func (core *Core) GenerateRefreshTokenJWT(
 
 	tokenClaims := &iam.RefreshTokenClaims{
 		NotBefore:      issueTime.Unix(),
-		ExpiresAt:      issueTime.Add(iam.RefreshTokenTTL).Unix(),
+		ExpiresAt:      issueTime.Add(iam.RefreshTokenTTLDefault).Unix(),
 		TerminalID:     terminalID.String(),
 		TerminalSecret: terminalSecret,
 	}

@@ -110,7 +110,7 @@ func (restSrv *Server) handleTokenRequestByClientCredentials(
 			TokenResponse: oauth2.TokenResponse{
 				AccessToken:  accessToken,
 				TokenType:    oauth2.TokenTypeBearer,
-				ExpiresIn:    iam.AccessTokenTTLInSeconds,
+				ExpiresIn:    iam.AccessTokenTTLDefaultInSeconds,
 				RefreshToken: refreshToken,
 			},
 			UserID:         authCtx.UserID.String(),

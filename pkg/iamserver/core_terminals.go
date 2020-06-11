@@ -214,12 +214,18 @@ func (core *Core) StartTerminalAuthorizationByEmailAddress(
 	return
 }
 
-//TODO: rate limit
+// ConfirmTerminalAuthorization confirms authorization for a terminal by
+// providing the verificationCode which was delivered through selected
+// channel when the authorization was created.
 func (core *Core) ConfirmTerminalAuthorization(
 	callCtx iam.CallContext,
 	terminalID iam.TerminalID,
 	verificationCode string,
 ) (secret string, userID iam.UserID, err error) {
+	// The code is verified based on the identifier used when the verification
+	// was requested. Each of the implementation required to implement
+	// limit the number of failed attempts.
+
 	tNow := time.Now().UTC()
 
 	userTermModel, err := core.getTerminal(terminalID)
