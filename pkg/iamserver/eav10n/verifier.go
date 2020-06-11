@@ -98,6 +98,7 @@ type Verifier struct {
 	confirmationAttemptsMax int16
 }
 
+//TODO(exa): make the operations atomic
 func (verifier *Verifier) StartVerification(
 	callCtx iam.CallContext,
 	emailAddress iam.EmailAddress,
@@ -112,7 +113,6 @@ func (verifier *Verifier) StartVerification(
 
 	tNow := time.Now().UTC()
 
-	//TODO(exa): prone to race-condition
 	var prevAttempts int16
 	var prevVerificationID int64
 	var prevCodeExpiry time.Time
@@ -210,7 +210,6 @@ func (verifier *Verifier) ConfirmVerification(
 		return ErrVerificationCodeExpired
 	}
 	if dbData.Code != code {
-		//TODO: if delay based on the number of attempts
 		return ErrVerificationCodeMismatch
 	}
 	if dbData.CodeExpiry != nil && dbData.CodeExpiry.Before(tNow) {

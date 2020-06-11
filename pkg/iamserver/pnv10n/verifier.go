@@ -84,24 +84,32 @@ func NewVerifier(
 		codeTTLDefault = 5 * time.Minute //TODO: should be based on the length of the code
 	}
 
+	confirmationAttemptsMax := config.ConfirmationAttemptsMax
+	if confirmationAttemptsMax == 0 {
+		confirmationAttemptsMax = 5
+	}
+
 	return &Verifier{
-		appName:             appName,
-		db:                  db,
-		config:              config,
-		codeTTLDefaultValue: codeTTLDefault,
-		smsDeliveryServices: smsDeliveryServices,
+		appName:                 appName,
+		db:                      db,
+		config:                  config,
+		codeTTLDefaultValue:     codeTTLDefault,
+		smsDeliveryServices:     smsDeliveryServices,
+		confirmationAttemptsMax: confirmationAttemptsMax,
 	}
 }
 
 type Verifier struct {
-	appName             string
-	db                  *sqlx.DB
-	codeTTLDefaultValue time.Duration
-	config              Config
-	smsDeliveryServices map[int32]SMSDeliveryService
+	appName                 string
+	db                      *sqlx.DB
+	codeTTLDefaultValue     time.Duration
+	confirmationAttemptsMax int16
+	config                  Config
+	smsDeliveryServices     map[int32]SMSDeliveryService
 }
 
 //TODO: prefered method of verification (sms, phone call)
+//TODO(exa): make the operations atomic
 func (verifier *Verifier) StartVerification(
 	callCtx iam.CallContext,
 	phoneNumber iam.PhoneNumber,
@@ -116,22 +124,22 @@ func (verifier *Verifier) StartVerification(
 
 	tNow := time.Now().UTC()
 
-	//TODO(exa): prone to race-condition
+	var prevAttempts int16
 	var prevVerificationID int64
 	var prevCodeExpiry time.Time
 	err = verifier.db.
 		QueryRow(
-			"SELECT id, code_expiry "+
+			"SELECT id, code_expiry, attempts_remaining "+
 				"FROM phone_number_verifications "+
 				"WHERE country_code = $1 AND national_number = $2 AND confirmation_time IS NULL "+
 				"ORDER BY id DESC "+
 				"LIMIT 1",
 			phoneNumber.CountryCode(),
 			phoneNumber.NationalNumber()).
-		Scan(&prevVerificationID, &prevCodeExpiry)
+		Scan(&prevVerificationID, &prevCodeExpiry, &prevAttempts)
 	if err == nil {
 		// Return previous verification code
-		if prevCodeExpiry.After(tNow.Add(-10 * time.Second)) {
+		if prevAttempts > 0 && prevCodeExpiry.After(tNow.Add(-10*time.Second)) {
 			return prevVerificationID, &prevCodeExpiry, nil
 		}
 	}
@@ -151,8 +159,8 @@ func (verifier *Verifier) StartVerification(
 			"INSERT INTO phone_number_verifications ("+
 				"country_code, national_number, "+
 				"creation_time, creation_user_id, creation_terminal_id, "+
-				"code, code_expiry"+
-				") VALUES ($1, $2, $3, $4, $5, $6, $7) "+
+				"code, code_expiry, attempts_remaining"+
+				") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) "+
 				"RETURNING id",
 			phoneNumber.CountryCode(),
 			phoneNumber.NationalNumber(),
@@ -161,6 +169,7 @@ func (verifier *Verifier) StartVerification(
 			authCtx.TerminalID(),
 			code,
 			codeExp,
+			verifier.confirmationAttemptsMax,
 		).Scan(&id)
 	if err != nil {
 		return 0, nil, err
@@ -186,28 +195,32 @@ func (verifier *Verifier) ConfirmVerification(
 	}
 	authCtx := callCtx.Authorization()
 
-	var verificationModel verificationDBModel
+	var dbData verificationDBModel
 	tNow := time.Now().UTC()
 
 	err := verifier.db.QueryRowx(
-		"SELECT * "+
-			"FROM phone_number_verifications "+
-			"WHERE id = $1 LIMIT 1",
+		`UPDATE phone_number_verifications `+
+			`SET attempts_remaining = attempts_remaining - 1 `+
+			`WHERE id = $1 `+
+			`RETURNING *`,
 		verificationID).
-		StructScan(&verificationModel)
+		StructScan(&dbData)
 	if err != nil {
 		return err
 	}
 
-	if verificationModel.Code != code {
+	if dbData.AttemptsRemaining < 0 {
+		return ErrVerificationCodeExpired
+	}
+	if dbData.Code != code {
 		return ErrVerificationCodeMismatch
 	}
-	if verificationModel.CodeExpiry != nil && verificationModel.CodeExpiry.Before(tNow) {
+	if dbData.CodeExpiry != nil && dbData.CodeExpiry.Before(tNow) {
 		// Delete?
 		return ErrVerificationCodeExpired
 	}
 
-	if verificationModel.ConfirmationTime != nil {
+	if dbData.ConfirmationTime != nil {
 		return nil
 	}
 

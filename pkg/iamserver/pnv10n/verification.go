@@ -31,6 +31,7 @@ type verificationDBModel struct {
 	NationalNumber         int64           `db:"national_number"`
 	Code                   string          `db:"code"`
 	CodeExpiry             *time.Time      `db:"code_expiry"`
+	AttemptsRemaining      int16           `db:"attempts_remaining"`
 	CreationTime           time.Time       `db:"creation_time"`
 	CreationUserID         iam.UserID      `db:"creation_user_id"`
 	CreationTerminalID     iam.TerminalID  `db:"creation_terminal_id"`
