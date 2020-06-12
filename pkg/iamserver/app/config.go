@@ -1,7 +1,7 @@
 package app
 
 import (
-	"github.com/citadelium/foundation/pkg/app"
+	"github.com/kadisoka/foundation/pkg/app"
 
 	"github.com/citadelium/iam/pkg/iamserver"
 	"github.com/citadelium/iam/pkg/iamserver/grpc"

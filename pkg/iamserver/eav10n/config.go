@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/citadelium/foundation/pkg/errors"
+	"github.com/kadisoka/foundation/pkg/errors"
 	"github.com/rez-go/stev"
 )
 

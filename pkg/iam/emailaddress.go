@@ -4,8 +4,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/citadelium/foundation/pkg/errors"
-	dataerrs "github.com/citadelium/foundation/pkg/errors/data"
+	"github.com/kadisoka/foundation/pkg/errors"
+	dataerrs "github.com/kadisoka/foundation/pkg/errors/data"
 )
 
 //NOTE: actually, it's not recommended to use regex to

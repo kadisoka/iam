@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/citadelium/foundation/pkg/api/rest"
-	"github.com/citadelium/foundation/pkg/errors"
 	"github.com/emicklei/go-restful"
+	"github.com/kadisoka/foundation/pkg/api/rest"
+	"github.com/kadisoka/foundation/pkg/errors"
 
 	"github.com/citadelium/iam/pkg/iam"
 	"github.com/citadelium/iam/pkg/iamserver/pnv10n"

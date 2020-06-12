@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"reflect"
 
-	"github.com/citadelium/foundation/pkg/webui"
+	"github.com/kadisoka/foundation/pkg/webui"
 
 	"github.com/citadelium/iam/pkg/iam"
 )

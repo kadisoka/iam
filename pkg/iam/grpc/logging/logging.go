@@ -1,8 +1,8 @@
 package logging
 
 import (
-	"github.com/citadelium/foundation/pkg/api"
-	foundationlog "github.com/citadelium/foundation/pkg/logging"
+	"github.com/kadisoka/foundation/pkg/api"
+	foundationlog "github.com/kadisoka/foundation/pkg/logging"
 	"google.golang.org/grpc"
 
 	"github.com/citadelium/iam/pkg/iam"

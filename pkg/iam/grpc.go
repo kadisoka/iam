@@ -3,7 +3,7 @@ package iam
 import (
 	"context"
 
-	"github.com/citadelium/foundation/pkg/api/grpc"
+	"github.com/kadisoka/foundation/pkg/api/grpc"
 )
 
 // GRPCServiceClient is the interface specialized for GRPC.

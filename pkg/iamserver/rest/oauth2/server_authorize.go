@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/citadelium/foundation/pkg/api/oauth2"
-	"github.com/citadelium/foundation/pkg/api/rest"
 	"github.com/emicklei/go-restful"
+	"github.com/kadisoka/foundation/pkg/api/oauth2"
+	"github.com/kadisoka/foundation/pkg/api/rest"
 	"golang.org/x/text/language"
 
 	"github.com/citadelium/iam/pkg/iam"

@@ -1,7 +1,7 @@
 package iam
 
 import (
-	"github.com/citadelium/foundation/pkg/errors"
+	"github.com/kadisoka/foundation/pkg/errors"
 )
 
 type Error struct {

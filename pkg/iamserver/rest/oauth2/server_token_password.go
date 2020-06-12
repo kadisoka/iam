@@ -5,8 +5,8 @@ package oauth2
 import (
 	"strings"
 
-	"github.com/citadelium/foundation/pkg/api/oauth2"
 	"github.com/emicklei/go-restful"
+	"github.com/kadisoka/foundation/pkg/api/oauth2"
 
 	"github.com/citadelium/iam/pkg/iam"
 )

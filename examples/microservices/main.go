@@ -9,10 +9,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/citadelium/foundation/pkg/api/rest"
 	"github.com/emicklei/go-restful"
 	restfulspec "github.com/emicklei/go-restful-openapi"
 	"github.com/go-openapi/spec"
+	"github.com/kadisoka/foundation/pkg/api/rest"
 	_ "github.com/lib/pq"
 
 	"github.com/citadelium/iam/pkg/iam"

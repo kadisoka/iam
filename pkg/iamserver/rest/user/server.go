@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"strings"
 
-	oidc "github.com/citadelium/foundation/pkg/api/openid/connect"
-	"github.com/citadelium/foundation/pkg/api/rest"
 	"github.com/emicklei/go-restful"
 	restfulspec "github.com/emicklei/go-restful-openapi"
+	oidc "github.com/kadisoka/foundation/pkg/api/openid/connect"
+	"github.com/kadisoka/foundation/pkg/api/rest"
 
 	"github.com/citadelium/iam/pkg/iam"
 	"github.com/citadelium/iam/pkg/iam/rest/logging"

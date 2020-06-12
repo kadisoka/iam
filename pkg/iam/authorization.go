@@ -3,9 +3,9 @@ package iam
 import (
 	"time"
 
-	"github.com/citadelium/foundation/pkg/errors"
-	dataerrs "github.com/citadelium/foundation/pkg/errors/data"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/kadisoka/foundation/pkg/errors"
+	dataerrs "github.com/kadisoka/foundation/pkg/errors/data"
 )
 
 // Used in API call metadata: HTTP header and gRPC call metadata

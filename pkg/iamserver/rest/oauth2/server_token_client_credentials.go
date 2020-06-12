@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/citadelium/foundation/pkg/api/oauth2"
 	"github.com/emicklei/go-restful"
+	"github.com/kadisoka/foundation/pkg/api/oauth2"
 
 	"github.com/citadelium/iam/pkg/iam"
 	"github.com/citadelium/iam/pkg/iamserver"

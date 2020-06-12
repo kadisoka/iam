@@ -3,8 +3,8 @@ package user
 import (
 	"net/http"
 
-	"github.com/citadelium/foundation/pkg/api/rest"
 	"github.com/emicklei/go-restful"
+	"github.com/kadisoka/foundation/pkg/api/rest"
 )
 
 type userPasswordPutRequest struct {

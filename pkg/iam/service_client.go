@@ -8,8 +8,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/citadelium/foundation/pkg/api/oauth2"
-	"github.com/citadelium/foundation/pkg/errors"
+	"github.com/kadisoka/foundation/pkg/api/oauth2"
+	"github.com/kadisoka/foundation/pkg/errors"
 	grpcmd "google.golang.org/grpc/metadata"
 )
 

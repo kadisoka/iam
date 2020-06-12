@@ -3,9 +3,9 @@ package grpc
 import (
 	"context"
 
-	grpcerrs "github.com/citadelium/foundation/pkg/api/grpc/errors"
-	"github.com/citadelium/foundation/pkg/errors"
 	pbtypes "github.com/gogo/protobuf/types"
+	grpcerrs "github.com/kadisoka/foundation/pkg/api/grpc/errors"
+	"github.com/kadisoka/foundation/pkg/errors"
 	iampb "github.com/rez-go/crux-apis/crux/iam/v1"
 	"golang.org/x/text/language"
 	"google.golang.org/grpc"

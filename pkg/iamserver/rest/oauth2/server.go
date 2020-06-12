@@ -3,10 +3,10 @@ package oauth2
 import (
 	"net/http"
 
-	"github.com/citadelium/foundation/pkg/api/oauth2"
-	apperrs "github.com/citadelium/foundation/pkg/app/errors"
 	"github.com/emicklei/go-restful"
 	"github.com/emicklei/go-restful-openapi"
+	"github.com/kadisoka/foundation/pkg/api/oauth2"
+	apperrs "github.com/kadisoka/foundation/pkg/app/errors"
 
 	"github.com/citadelium/iam/pkg/iam"
 	"github.com/citadelium/iam/pkg/iam/rest/logging"

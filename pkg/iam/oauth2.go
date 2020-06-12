@@ -1,7 +1,7 @@
 package iam
 
 import (
-	"github.com/citadelium/foundation/pkg/api/oauth2"
+	"github.com/kadisoka/foundation/pkg/api/oauth2"
 )
 
 type OAuth2TokenResponse struct {

@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/citadelium/foundation/pkg/errors"
+	"github.com/kadisoka/foundation/pkg/errors"
 	"github.com/lib/pq"
 
 	"github.com/citadelium/iam/pkg/iam"

@@ -6,12 +6,12 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/citadelium/foundation/pkg/api/rest"
-	"github.com/citadelium/foundation/pkg/app"
-	"github.com/citadelium/foundation/pkg/errors"
 	"github.com/emicklei/go-restful"
 	restfulspec "github.com/emicklei/go-restful-openapi"
 	"github.com/go-openapi/spec"
+	"github.com/kadisoka/foundation/pkg/api/rest"
+	"github.com/kadisoka/foundation/pkg/app"
+	"github.com/kadisoka/foundation/pkg/errors"
 
 	"github.com/citadelium/iam/pkg/iam"
 	"github.com/citadelium/iam/pkg/iamserver"

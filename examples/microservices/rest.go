@@ -3,9 +3,9 @@ package main
 import (
 	"net/http"
 
-	"github.com/citadelium/foundation/pkg/api/rest"
 	"github.com/emicklei/go-restful"
 	restfulspec "github.com/emicklei/go-restful-openapi"
+	"github.com/kadisoka/foundation/pkg/api/rest"
 
 	"github.com/citadelium/iam/pkg/iam"
 )

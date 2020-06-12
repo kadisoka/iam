@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/citadelium/foundation/pkg/errors"
+	"github.com/kadisoka/foundation/pkg/errors"
 	"google.golang.org/grpc"
 
 	"github.com/citadelium/iam/pkg/iamserver"

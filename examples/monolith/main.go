@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/citadelium/foundation/pkg/app"
-	"github.com/citadelium/foundation/pkg/webui"
+	"github.com/kadisoka/foundation/pkg/app"
+	"github.com/kadisoka/foundation/pkg/webui"
 	_ "github.com/lib/pq"
 	"github.com/rez-go/stev"
 

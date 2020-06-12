@@ -15,9 +15,9 @@ import (
 	awscreds "github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ses"
-	"github.com/citadelium/foundation/pkg/app"
-	"github.com/citadelium/foundation/pkg/errors"
 	"github.com/jmoiron/sqlx"
+	"github.com/kadisoka/foundation/pkg/app"
+	"github.com/kadisoka/foundation/pkg/errors"
 	"golang.org/x/text/language"
 
 	"github.com/citadelium/iam/pkg/iam"

@@ -1,7 +1,7 @@
 package logging
 
 import (
-	foundationlog "github.com/citadelium/foundation/pkg/logging"
+	foundationlog "github.com/kadisoka/foundation/pkg/logging"
 
 	"github.com/citadelium/iam/pkg/iam"
 )

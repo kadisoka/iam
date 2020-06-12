@@ -1,8 +1,8 @@
 package iam
 
 import (
-	"github.com/citadelium/foundation/pkg/app"
-	"github.com/citadelium/foundation/pkg/errors"
+	"github.com/kadisoka/foundation/pkg/app"
+	"github.com/kadisoka/foundation/pkg/errors"
 )
 
 func NewAppSimple(envVarPrefix string) (*App, error) {

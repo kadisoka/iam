@@ -3,9 +3,9 @@ package user
 import (
 	"net/http"
 
-	"github.com/citadelium/foundation/pkg/api/rest"
-	"github.com/citadelium/foundation/pkg/errors"
 	"github.com/emicklei/go-restful"
+	"github.com/kadisoka/foundation/pkg/api/rest"
+	"github.com/kadisoka/foundation/pkg/errors"
 )
 
 type userProfileImagePutResponse struct {
