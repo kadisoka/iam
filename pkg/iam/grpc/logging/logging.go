@@ -5,7 +5,7 @@ import (
 	foundationlog "github.com/kadisoka/foundation/pkg/logging"
 	"google.golang.org/grpc"
 
-	"github.com/citadelium/iam/pkg/iam"
+	"github.com/kadisoka/iam/pkg/iam"
 )
 
 // NewPkgLogger creates a logger for use within a package. This logger

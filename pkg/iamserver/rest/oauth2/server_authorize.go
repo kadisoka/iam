@@ -13,8 +13,8 @@ import (
 	"github.com/kadisoka/foundation/pkg/api/rest"
 	"golang.org/x/text/language"
 
-	"github.com/citadelium/iam/pkg/iam"
-	"github.com/citadelium/iam/pkg/iamserver"
+	"github.com/kadisoka/iam/pkg/iam"
+	"github.com/kadisoka/iam/pkg/iamserver"
 )
 
 func (restSrv *Server) getAuthorize(req *restful.Request, resp *restful.Response) {

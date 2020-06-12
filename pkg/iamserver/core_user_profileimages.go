@@ -8,7 +8,7 @@ import (
 	"github.com/kadisoka/foundation/pkg/media"
 	mediapb "github.com/rez-go/crux-apis/crux/media/v1"
 
-	"github.com/citadelium/iam/pkg/iam"
+	"github.com/kadisoka/iam/pkg/iam"
 )
 
 type ProfileImageFile interface {

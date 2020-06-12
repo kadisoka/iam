@@ -16,14 +16,14 @@ import (
 	mediastore "github.com/kadisoka/foundation/pkg/media/store"
 	_ "github.com/lib/pq"
 
-	"github.com/citadelium/iam/pkg/iam"
-	"github.com/citadelium/iam/pkg/iamserver/eav10n"
-	"github.com/citadelium/iam/pkg/iamserver/pnv10n"
+	"github.com/kadisoka/iam/pkg/iam"
+	"github.com/kadisoka/iam/pkg/iamserver/eav10n"
+	"github.com/kadisoka/iam/pkg/iamserver/pnv10n"
 
 	// SMS delivery service providers
-	_ "github.com/citadelium/iam/pkg/iamserver/pnv10n/nexmo"
-	_ "github.com/citadelium/iam/pkg/iamserver/pnv10n/telesign"
-	_ "github.com/citadelium/iam/pkg/iamserver/pnv10n/twilio"
+	_ "github.com/kadisoka/iam/pkg/iamserver/pnv10n/nexmo"
+	_ "github.com/kadisoka/iam/pkg/iamserver/pnv10n/telesign"
+	_ "github.com/kadisoka/iam/pkg/iamserver/pnv10n/twilio"
 
 	// Media object storage modules
 	_ "github.com/kadisoka/foundation/pkg/media/store/minio"

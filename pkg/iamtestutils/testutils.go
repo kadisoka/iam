@@ -15,7 +15,7 @@ package iamtestutils
 // 	_ "github.com/lib/pq"
 // 	"github.com/nyaruka/phonenumbers"
 
-// 	"github.com/citadelium/iam/pkg/iam"
+// 	"github.com/kadisoka/iam/pkg/iam"
 // )
 
 // func RegisterAndAuthenticate(

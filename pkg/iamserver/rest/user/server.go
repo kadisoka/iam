@@ -10,9 +10,9 @@ import (
 	oidc "github.com/kadisoka/foundation/pkg/api/openid/connect"
 	"github.com/kadisoka/foundation/pkg/api/rest"
 
-	"github.com/citadelium/iam/pkg/iam"
-	"github.com/citadelium/iam/pkg/iam/rest/logging"
-	"github.com/citadelium/iam/pkg/iamserver"
+	"github.com/kadisoka/iam/pkg/iam"
+	"github.com/kadisoka/iam/pkg/iam/rest/logging"
+	"github.com/kadisoka/iam/pkg/iamserver"
 )
 
 const (

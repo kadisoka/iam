@@ -9,8 +9,8 @@ import (
 	"github.com/kadisoka/foundation/pkg/errors"
 	"github.com/lib/pq"
 
-	"github.com/citadelium/iam/pkg/iam"
-	"github.com/citadelium/iam/pkg/iamserver/pnv10n"
+	"github.com/kadisoka/iam/pkg/iam"
+	"github.com/kadisoka/iam/pkg/iamserver/pnv10n"
 )
 
 func (core *Core) ListUsersByPhoneNumber(

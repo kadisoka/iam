@@ -3,7 +3,7 @@ package nexmo
 import (
 	"errors"
 
-	"github.com/citadelium/iam/pkg/iamserver/pnv10n"
+	"github.com/kadisoka/iam/pkg/iamserver/pnv10n"
 )
 
 const ServiceName = "nexmo"

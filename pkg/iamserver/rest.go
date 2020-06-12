@@ -8,7 +8,7 @@ import (
 	"github.com/kadisoka/foundation/pkg/errors"
 	dataerrs "github.com/kadisoka/foundation/pkg/errors/data"
 
-	"github.com/citadelium/iam/pkg/iam"
+	"github.com/kadisoka/iam/pkg/iam"
 )
 
 type RESTServiceServerBase struct {

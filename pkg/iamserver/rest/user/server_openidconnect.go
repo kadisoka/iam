@@ -7,7 +7,7 @@ import (
 	oidc "github.com/kadisoka/foundation/pkg/api/openid/connect"
 	"github.com/kadisoka/foundation/pkg/api/rest"
 
-	"github.com/citadelium/iam/pkg/iam"
+	"github.com/kadisoka/iam/pkg/iam"
 )
 
 //TODO: the details would be depends on the type of the client:

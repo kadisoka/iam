@@ -12,7 +12,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/citadelium/iam/pkg/jose/jwk"
+	"github.com/kadisoka/iam/pkg/jose/jwk"
 )
 
 func NewJWTKeyChainFromFiles(

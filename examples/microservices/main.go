@@ -15,8 +15,8 @@ import (
 	"github.com/kadisoka/foundation/pkg/api/rest"
 	_ "github.com/lib/pq"
 
-	"github.com/citadelium/iam/pkg/iam"
-	"github.com/citadelium/iam/pkg/iam/rest/logging"
+	"github.com/kadisoka/iam/pkg/iam"
+	"github.com/kadisoka/iam/pkg/iam/rest/logging"
 )
 
 var log = logging.NewPkgLogger()
@@ -27,7 +27,7 @@ var (
 )
 
 func main() {
-	fmt.Fprintf(os.Stderr, "Citadel IAM Test Client Service revision %s built at %s\n",
+	fmt.Fprintf(os.Stderr, "Kadisoka IAM Test Client Service revision %s built at %s\n",
 		revisionID, buildTimestamp)
 
 	log.Info().Msg("Initializing app...")
@@ -124,7 +124,7 @@ func enrichSwaggerObject(swo *spec.Swagger) {
 	}
 	swo.Info = &spec.Info{
 		InfoProps: spec.InfoProps{
-			Title:       "Citadel IAM Test Client Service",
+			Title:       "Kadisoka IAM Test Client Service",
 			Description: "A service which demonstrates 3-legged authorization",
 			Version:     fmt.Sprintf("0.1.0-%s built at %s", rev, buildTimestamp),
 		},

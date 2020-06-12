@@ -1,7 +1,7 @@
 package jws
 
 import (
-	"github.com/citadelium/iam/pkg/jose"
+	"github.com/kadisoka/iam/pkg/jose"
 )
 
 const (

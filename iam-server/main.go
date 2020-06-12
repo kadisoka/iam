@@ -8,12 +8,12 @@ import (
 	"github.com/kadisoka/foundation/pkg/webui"
 	_ "github.com/lib/pq"
 
-	"github.com/citadelium/iam/pkg/iam/logging"
-	"github.com/citadelium/iam/pkg/iamserver"
-	srvapp "github.com/citadelium/iam/pkg/iamserver/app"
-	srvgrpc "github.com/citadelium/iam/pkg/iamserver/grpc"
-	srvrest "github.com/citadelium/iam/pkg/iamserver/rest"
-	srvwebui "github.com/citadelium/iam/pkg/iamserver/webui"
+	"github.com/kadisoka/iam/pkg/iam/logging"
+	"github.com/kadisoka/iam/pkg/iamserver"
+	srvapp "github.com/kadisoka/iam/pkg/iamserver/app"
+	srvgrpc "github.com/kadisoka/iam/pkg/iamserver/grpc"
+	srvrest "github.com/kadisoka/iam/pkg/iamserver/rest"
+	srvwebui "github.com/kadisoka/iam/pkg/iamserver/webui"
 )
 
 var log = logging.NewPkgLogger()

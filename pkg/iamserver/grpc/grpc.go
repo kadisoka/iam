@@ -4,7 +4,7 @@
 package grpc
 
 import (
-	"github.com/citadelium/iam/pkg/iam/grpc/logging"
+	"github.com/kadisoka/iam/pkg/iam/grpc/logging"
 )
 
 var log = logging.NewPkgLogger()

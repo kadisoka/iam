@@ -6,7 +6,7 @@ import (
 
 	"github.com/kadisoka/foundation/pkg/webui"
 
-	"github.com/citadelium/iam/pkg/iam"
+	"github.com/kadisoka/iam/pkg/iam"
 )
 
 var ResourcesDirDefault string

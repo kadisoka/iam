@@ -1,4 +1,4 @@
-module github.com/citadelium/iam
+module github.com/kadisoka/iam
 
 go 1.14
 

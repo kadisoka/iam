@@ -28,5 +28,5 @@ workbox.precaching.cleanupOutdatedCaches()
 // --------------------------------------------------
 
 // Register route handlers for runtimeCaching
-workbox.routing.registerRoute(new RegExp('/citadel-iam-webui-base-path/_nuxt/'), new workbox.strategies.CacheFirst ({}), 'GET')
-workbox.routing.registerRoute(new RegExp('/citadel-iam-webui-base-path/'), new workbox.strategies.NetworkFirst ({}), 'GET')
+workbox.routing.registerRoute(new RegExp('/kadisoka-iam-webui-base-path/_nuxt/'), new workbox.strategies.CacheFirst ({}), 'GET')
+workbox.routing.registerRoute(new RegExp('/kadisoka-iam-webui-base-path/'), new workbox.strategies.NetworkFirst ({}), 'GET')

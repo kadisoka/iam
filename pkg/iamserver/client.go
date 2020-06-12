@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/citadelium/iam/pkg/iam"
+	"github.com/kadisoka/iam/pkg/iam"
 )
 
 type ClientStaticDataProvider struct {

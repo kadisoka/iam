@@ -11,9 +11,9 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/rez-go/stev"
 
-	"github.com/citadelium/iam/pkg/iam/logging"
-	"github.com/citadelium/iam/pkg/iamserver"
-	iamapp "github.com/citadelium/iam/pkg/iamserver/app"
+	"github.com/kadisoka/iam/pkg/iam/logging"
+	"github.com/kadisoka/iam/pkg/iamserver"
+	iamapp "github.com/kadisoka/iam/pkg/iamserver/app"
 )
 
 var log = logging.NewPkgLogger()
@@ -24,7 +24,7 @@ var (
 )
 
 func main() {
-	fmt.Fprintf(os.Stderr, "Citadel monolith example server revision %v built at %v\n",
+	fmt.Fprintf(os.Stderr, "Kadisoka monolith example server revision %v built at %v\n",
 		revisionID, buildTimestamp)
 	app.SetBuildInfo(revisionID, buildTimestamp)
 

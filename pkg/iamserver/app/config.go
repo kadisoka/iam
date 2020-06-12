@@ -3,10 +3,10 @@ package app
 import (
 	"github.com/kadisoka/foundation/pkg/app"
 
-	"github.com/citadelium/iam/pkg/iamserver"
-	"github.com/citadelium/iam/pkg/iamserver/grpc"
-	"github.com/citadelium/iam/pkg/iamserver/rest"
-	"github.com/citadelium/iam/pkg/iamserver/webui"
+	"github.com/kadisoka/iam/pkg/iamserver"
+	"github.com/kadisoka/iam/pkg/iamserver/grpc"
+	"github.com/kadisoka/iam/pkg/iamserver/rest"
+	"github.com/kadisoka/iam/pkg/iamserver/webui"
 )
 
 type Config struct {

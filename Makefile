@@ -1,6 +1,6 @@
 
-LINTER_IMAGE ?= citadel-linter
-TESTER_IMAGE ?= citadel-tester
+LINTER_IMAGE ?= kadisoka-linter
+TESTER_IMAGE ?= kadisoka-tester
 GOLANG_IMAGE ?= golang:1.14
 POSTGRES_IMAGE ?= postgres:10.7-alpine
 

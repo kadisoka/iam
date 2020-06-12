@@ -8,7 +8,7 @@ import (
 	"github.com/kadisoka/foundation/pkg/errors"
 	"google.golang.org/grpc"
 
-	"github.com/citadelium/iam/pkg/iamserver"
+	"github.com/kadisoka/iam/pkg/iamserver"
 )
 
 type ServerConfig struct {

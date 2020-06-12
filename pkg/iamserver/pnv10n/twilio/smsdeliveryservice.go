@@ -9,7 +9,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/citadelium/iam/pkg/iamserver/pnv10n"
+	"github.com/kadisoka/iam/pkg/iamserver/pnv10n"
 )
 
 // SendTextMessage is use for send text message using sms delivery service

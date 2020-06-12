@@ -10,7 +10,7 @@ import (
 	"math/big"
 	"net/http"
 
-	"github.com/citadelium/iam/pkg/jose/jwa"
+	"github.com/kadisoka/iam/pkg/jose/jwa"
 )
 
 type Set struct {

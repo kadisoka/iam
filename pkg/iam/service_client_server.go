@@ -14,7 +14,7 @@ import (
 	grpcmd "google.golang.org/grpc/metadata"
 	grpcpeer "google.golang.org/grpc/peer"
 
-	"github.com/citadelium/iam/pkg/jose/jws"
+	"github.com/kadisoka/iam/pkg/jose/jws"
 )
 
 // ServiceClientServer is an interface which contains utilities for

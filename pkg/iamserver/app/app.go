@@ -9,11 +9,11 @@ import (
 	"github.com/kadisoka/foundation/pkg/webui"
 	"github.com/rez-go/stev"
 
-	"github.com/citadelium/iam/pkg/iam/logging"
-	"github.com/citadelium/iam/pkg/iamserver"
-	"github.com/citadelium/iam/pkg/iamserver/grpc"
-	"github.com/citadelium/iam/pkg/iamserver/rest"
-	iamwebui "github.com/citadelium/iam/pkg/iamserver/webui"
+	"github.com/kadisoka/iam/pkg/iam/logging"
+	"github.com/kadisoka/iam/pkg/iamserver"
+	"github.com/kadisoka/iam/pkg/iamserver/grpc"
+	"github.com/kadisoka/iam/pkg/iamserver/rest"
+	iamwebui "github.com/kadisoka/iam/pkg/iamserver/webui"
 )
 
 var log = logging.NewPkgLogger()
@@ -93,7 +93,7 @@ func setUpWebUIServer(srvApp *App, cfg Config) (*webui.Server, error) {
 		New: strings.TrimRight(cfg.RESTCanonicalBaseURL, "/"),
 	}
 	webUIServeURLReplacer := &webui.StringReplacer{
-		Old: "/citadel-iam-webui-base-path/",
+		Old: "/kadisoka-iam-webui-base-path/",
 		New: webUICfg.ServePath,
 	}
 	homeURLReplacer := &webui.StringReplacer{

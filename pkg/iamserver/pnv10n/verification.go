@@ -3,7 +3,7 @@ package pnv10n
 import (
 	"time"
 
-	"github.com/citadelium/iam/pkg/iam"
+	"github.com/kadisoka/iam/pkg/iam"
 )
 
 type VerificationMethod int

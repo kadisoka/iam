@@ -11,9 +11,9 @@ import (
 	"github.com/kadisoka/foundation/pkg/errors"
 	"golang.org/x/text/language"
 
-	"github.com/citadelium/iam/pkg/iam"
-	"github.com/citadelium/iam/pkg/iamserver/eav10n"
-	"github.com/citadelium/iam/pkg/iamserver/pnv10n"
+	"github.com/kadisoka/iam/pkg/iam"
+	"github.com/kadisoka/iam/pkg/iamserver/eav10n"
+	"github.com/kadisoka/iam/pkg/iamserver/pnv10n"
 )
 
 var (

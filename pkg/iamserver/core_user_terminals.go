@@ -4,7 +4,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/kadisoka/foundation/pkg/errors"
 
-	"github.com/citadelium/iam/pkg/iam"
+	"github.com/kadisoka/iam/pkg/iam"
 )
 
 func (core *Core) DeleteUserTerminalFCMRegistrationToken(

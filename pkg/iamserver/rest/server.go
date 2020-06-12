@@ -13,11 +13,11 @@ import (
 	"github.com/kadisoka/foundation/pkg/app"
 	"github.com/kadisoka/foundation/pkg/errors"
 
-	"github.com/citadelium/iam/pkg/iam"
-	"github.com/citadelium/iam/pkg/iamserver"
-	"github.com/citadelium/iam/pkg/iamserver/rest/oauth2"
-	"github.com/citadelium/iam/pkg/iamserver/rest/terminal"
-	"github.com/citadelium/iam/pkg/iamserver/rest/user"
+	"github.com/kadisoka/iam/pkg/iam"
+	"github.com/kadisoka/iam/pkg/iamserver"
+	"github.com/kadisoka/iam/pkg/iamserver/rest/oauth2"
+	"github.com/kadisoka/iam/pkg/iamserver/rest/terminal"
+	"github.com/kadisoka/iam/pkg/iamserver/rest/user"
 )
 
 const ServerLatestVersionString = "v1"

@@ -17,7 +17,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/citadelium/iam/pkg/iamtestutils"
+	"github.com/kadisoka/iam/pkg/iamtestutils"
 )
 
 var baseURL = "http://localhost:8080/iam/terminals"

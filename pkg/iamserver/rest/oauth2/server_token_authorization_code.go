@@ -9,7 +9,7 @@ import (
 	"github.com/kadisoka/foundation/pkg/api/oauth2"
 	"github.com/kadisoka/foundation/pkg/errors"
 
-	"github.com/citadelium/iam/pkg/iam"
+	"github.com/kadisoka/iam/pkg/iam"
 )
 
 func (restSrv *Server) handleTokenRequestByAuthorizationCodeGrant(

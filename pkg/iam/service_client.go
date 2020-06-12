@@ -173,7 +173,7 @@ func (svcClient *ServiceClientCore) obtainAccessTokenByClientCredentials(
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	runtimeVersion := runtime.Version()
 	runtimeVersion = "go/" + strings.TrimPrefix(runtimeVersion, "go")
-	req.Header.Set("User-Agent", "Citadel-IAM-Client/1.0 "+runtimeVersion+" ("+serviceInstanceID+")")
+	req.Header.Set("User-Agent", "Kadisoka-IAM-Client/1.0 "+runtimeVersion+" ("+serviceInstanceID+")")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)

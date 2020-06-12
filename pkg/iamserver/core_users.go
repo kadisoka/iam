@@ -12,7 +12,7 @@ import (
 	iampb "github.com/rez-go/crux-apis/crux/iam/v1"
 	"golang.org/x/crypto/blake2b"
 
-	"github.com/citadelium/iam/pkg/iam"
+	"github.com/kadisoka/iam/pkg/iam"
 )
 
 func (core *Core) GetUserBaseProfile(

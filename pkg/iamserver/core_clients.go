@@ -1,7 +1,7 @@
 package iamserver
 
 import (
-	"github.com/citadelium/iam/pkg/iam"
+	"github.com/kadisoka/iam/pkg/iam"
 )
 
 func (core *Core) ClientByID(id iam.ClientID) (*iam.Client, error) {

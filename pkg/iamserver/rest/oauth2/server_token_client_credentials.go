@@ -9,8 +9,8 @@ import (
 	"github.com/emicklei/go-restful"
 	"github.com/kadisoka/foundation/pkg/api/oauth2"
 
-	"github.com/citadelium/iam/pkg/iam"
-	"github.com/citadelium/iam/pkg/iamserver"
+	"github.com/kadisoka/iam/pkg/iam"
+	"github.com/kadisoka/iam/pkg/iamserver"
 )
 
 func (restSrv *Server) handleTokenRequestByClientCredentials(

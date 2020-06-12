@@ -7,7 +7,7 @@ import (
 	foundationlog "github.com/kadisoka/foundation/pkg/logging"
 	"github.com/tomasen/realip"
 
-	"github.com/citadelium/iam/pkg/iam"
+	"github.com/kadisoka/iam/pkg/iam"
 )
 
 // NewPkgLogger creates a logger for use within a package. This logger

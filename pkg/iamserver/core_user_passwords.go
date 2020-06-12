@@ -13,7 +13,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"golang.org/x/crypto/argon2"
 
-	"github.com/citadelium/iam/pkg/iam"
+	"github.com/kadisoka/iam/pkg/iam"
 )
 
 var (

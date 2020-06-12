@@ -8,10 +8,10 @@ import (
 	"github.com/kadisoka/foundation/pkg/api/oauth2"
 	apperrs "github.com/kadisoka/foundation/pkg/app/errors"
 
-	"github.com/citadelium/iam/pkg/iam"
-	"github.com/citadelium/iam/pkg/iam/rest/logging"
-	"github.com/citadelium/iam/pkg/iamserver"
-	"github.com/citadelium/iam/pkg/jose/jwk"
+	"github.com/kadisoka/iam/pkg/iam"
+	"github.com/kadisoka/iam/pkg/iam/rest/logging"
+	"github.com/kadisoka/iam/pkg/iamserver"
+	"github.com/kadisoka/iam/pkg/jose/jwk"
 )
 
 var log = logging.NewPkgLogger()

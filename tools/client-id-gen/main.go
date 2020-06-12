@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/citadelium/iam/pkg/iam"
+	"github.com/kadisoka/iam/pkg/iam"
 )
 
 func main() {

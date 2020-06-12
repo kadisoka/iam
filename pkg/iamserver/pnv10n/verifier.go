@@ -15,7 +15,7 @@ import (
 	"github.com/kadisoka/foundation/pkg/errors"
 	"golang.org/x/text/language"
 
-	"github.com/citadelium/iam/pkg/iam"
+	"github.com/kadisoka/iam/pkg/iam"
 )
 
 func NewVerifier(
