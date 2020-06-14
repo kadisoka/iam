@@ -18,7 +18,7 @@ require (
 	github.com/lib/pq v1.7.0
 	github.com/mailru/easyjson v0.7.1 // indirect
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
-	github.com/nyaruka/phonenumbers v1.0.55
+	github.com/nyaruka/phonenumbers v1.0.56
 	github.com/rez-go/crux-apis v0.0.0-20200519131450-aab8ff73963b
 	github.com/rez-go/stev v0.0.0-20200515184012-e0723a6f3c19
 	github.com/richardlehane/crock32 v1.0.1
