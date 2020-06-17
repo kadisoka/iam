@@ -35,15 +35,15 @@ the command:
 docker-compose -f examples/monolith/docker-compose.yaml up --build
 ```
 
-### Use cases
+## Use cases
 
-#### Identity management mock service
+### Identity management mock service
 
 As your projects are integrated to other identity management service, you
 should tests the integrations. This project could be used as a mock of the
 identity management your projects integrate to.
 
-#### Monolithic service applications
+### Monolithic service applications
 
 If your application is relatively small in scale, like a simple online shop,
 a CMS, or a blog, you could import this module into your application to
