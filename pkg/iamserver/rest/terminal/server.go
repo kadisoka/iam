@@ -47,6 +47,7 @@ func (restSrv *Server) RestfulWebService() *restful.WebService {
 		Produces(restful.MIME_JSON)
 
 	tags := []string{"iam.v1.terminals"}
+	hidden := append([]string{"hidden"}, tags...)
 
 	restWS.Route(restWS.
 		POST("/register").
@@ -62,7 +63,7 @@ func (restSrv *Server) RestfulWebService() *restful.WebService {
 			"might not be associated to a user.").
 		Param(restWS.
 			HeaderParameter(
-				"Authorization", "Basic with client credentials.").
+				"Authorization", "basic-oauth2-client-creds").
 			Required(true)).
 		Reads(iam.TerminalRegisterPostRequestJSONV1{}).
 		Returns(http.StatusOK, "Terminal registered", iam.TerminalRegisterPostResponseJSONV1{}))
@@ -70,7 +71,7 @@ func (restSrv *Server) RestfulWebService() *restful.WebService {
 	restWS.Route(restWS.
 		POST("/secret").
 		Deprecate().
-		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Metadata(restfulspec.KeyOpenAPITags, hidden).
 		To(restSrv.postTerminalsSecret).
 		Doc("Terminal secret endpoint").
 		Notes("The terminal secret endpoint is used to obtain the terminal's "+
@@ -86,12 +87,12 @@ func (restSrv *Server) RestfulWebService() *restful.WebService {
 
 	restWS.Route(restWS.
 		PUT("/fcm_registration_token").
-		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Metadata(restfulspec.KeyOpenAPITags, hidden).
 		To(restSrv.putTerminalFCMRegistrationToken).
 		Doc("Set terminal's FCM token").
 		Notes("Associate the terminal with an FCM registration token. One token should "+
 			"be associated to only one terminal.").
-		Param(restWS.HeaderParameter("Authorization", "Bearer access token").
+		Param(restWS.HeaderParameter("Authorization", "bearer-access-token").
 			Required(true)).
 		Reads(terminalFCMRegistrationTokenPutRequest{}).
 		Returns(http.StatusNoContent, "Terminal's FCM token successfully set", nil))

@@ -124,12 +124,28 @@ func NewServer(
 	}
 	initRESTV1Services(v1ServePath, container, iamServerCore, webUIURLs.Login)
 
+	oaiSecDefs := spec.SecurityDefinitions{
+		"basic-oauth2-client-creds": spec.BasicAuth(),
+		"bearer-access-token":       spec.APIKeyAuth("Authorization", "header"),
+	}
 	// Setup API specification handler
 	container.Add(restfulspec.NewOpenAPIService(restfulspec.Config{
 		WebServices: container.RegisteredWebServices(),
 		APIPath:     apiDocsPath,
 		PostBuildSwaggerObjectHandler: func(swaggerSpec *spec.Swagger) {
+			for k := range swaggerSpec.Paths.Paths {
+				props := swaggerSpec.Paths.Paths[k]
+				props.Get = processPathOpSec(props.Get, oaiSecDefs)
+				props.Put = processPathOpSec(props.Put, oaiSecDefs)
+				props.Post = processPathOpSec(props.Post, oaiSecDefs)
+				props.Delete = processPathOpSec(props.Delete, oaiSecDefs)
+				props.Options = processPathOpSec(props.Options, oaiSecDefs)
+				props.Head = processPathOpSec(props.Head, oaiSecDefs)
+				props.Patch = processPathOpSec(props.Patch, oaiSecDefs)
+				swaggerSpec.Paths.Paths[k] = props
+			}
 			enrichSwaggerSpec(swaggerSpec, appInfo)
+			swaggerSpec.SecurityDefinitions = oaiSecDefs
 		},
 	}))
 
@@ -193,8 +209,47 @@ func enrichSwaggerSpec(swaggerSpec *spec.Swagger, appInfo app.Info) {
 			Version:     fmt.Sprintf("0.0.0-%s built at %s", rev, buildInfo.Timestamp),
 		},
 	}
-	swaggerSpec.SecurityDefinitions = spec.SecurityDefinitions{
-		"oauth-client": spec.BasicAuth(),
-		"bearer":       spec.APIKeyAuth("Authorization", ""),
+}
+
+func processPathOpSec(op *spec.Operation, secDefs spec.SecurityDefinitions) *spec.Operation {
+	if op == nil {
+		return nil
 	}
+
+	for _, tag := range op.Tags {
+		if tag == "hidden" {
+			return nil
+		}
+	}
+
+	var updatedParams []spec.Parameter
+	for _, p := range op.Parameters {
+		isSec := false
+		if p.Description != "" {
+			lowerDesc := strings.ToLower(p.Description)
+			for k, secDef := range secDefs {
+				if strings.HasPrefix(lowerDesc, k) {
+					if secDef.Type == "basic" {
+						if p.Name == "Authorization" && p.In == "header" {
+							op.Security = append(op.Security, map[string][]string{k: {}})
+							isSec = true
+							continue
+						}
+					}
+					if secDef.Type == "apiKey" {
+						if p.Name == secDef.Name && p.In == secDef.In {
+							op.Security = append(op.Security, map[string][]string{k: {}})
+							isSec = true
+							continue
+						}
+					}
+				}
+			}
+		}
+		if !isSec {
+			updatedParams = append(updatedParams, p)
+		}
+	}
+	op.Parameters = updatedParams
+	return op
 }

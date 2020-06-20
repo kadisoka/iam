@@ -106,7 +106,7 @@ func (restSrv *Server) RestfulWebService() *restful.WebService {
 			"(since an access token is issued directly). RFC 6749 § 3.2.").
 		Param(restWS.
 			HeaderParameter(
-				"Authorization", "Basic: client credentials").
+				"Authorization", "basic-oauth2-client-creds").
 			Required(true)).
 		Param(restWS.
 			FormParameter(
