@@ -1,4 +1,4 @@
-# Kadisoka Identity and Access Management Service
+# Kadisoka Identity Server Module
 
 Kadisoka IAM is a service module which provides identity and access
 management subsystem either as separate service (following microservice
@@ -21,7 +21,8 @@ docker-compose up --build
 ```
 
 Once started, the user-facing web UI could be accessed at
-`http://localhost:11111/` from the host.
+`http://localhost:11111/` from the host. The REST API documentation could
+be accessed at `http://localhost:11121/rest/apidocs/`.
 
 ### Starting the examples
 
@@ -37,11 +38,11 @@ docker-compose -f examples/monolith/docker-compose.yaml up --build
 
 ## Use cases
 
-### Identity management mock service
+### Identity server mock
 
 As your projects are integrated to other identity management service, you
-should tests the integrations. This project could be used as a mock of the
-identity management your projects integrate to.
+would need to test the integrations. This project could be used as a mock of
+the identity server your projects depended on.
 
 ### Monolithic service applications
 
@@ -50,6 +51,6 @@ a CMS, or a blog, you could import this module into your application to
 provide user account management for your application.
 
 Monolithic architecture is preferable if your service is relatively small as
-it's easier to maintain. Don't worry, if your service got big, you can
+it's easier to maintain. If your application is getting popular, you can
 transition to microservice architecture with minimum effort.
 
