@@ -124,7 +124,7 @@ func NewServer(
 	}
 	initRESTV1Services(v1ServePath, container, iamServerCore, webUIURLs.Login)
 
-	oaiSecDefs := spec.SecurityDefinitions{
+	secDefs := spec.SecurityDefinitions{
 		"basic-oauth2-client-creds": spec.BasicAuth(),
 		"bearer-access-token":       spec.APIKeyAuth("Authorization", "header"),
 	}
@@ -133,19 +133,7 @@ func NewServer(
 		WebServices: container.RegisteredWebServices(),
 		APIPath:     apiDocsPath,
 		PostBuildSwaggerObjectHandler: func(swaggerSpec *spec.Swagger) {
-			for k := range swaggerSpec.Paths.Paths {
-				props := swaggerSpec.Paths.Paths[k]
-				props.Get = processPathOpSec(props.Get, oaiSecDefs)
-				props.Put = processPathOpSec(props.Put, oaiSecDefs)
-				props.Post = processPathOpSec(props.Post, oaiSecDefs)
-				props.Delete = processPathOpSec(props.Delete, oaiSecDefs)
-				props.Options = processPathOpSec(props.Options, oaiSecDefs)
-				props.Head = processPathOpSec(props.Head, oaiSecDefs)
-				props.Patch = processPathOpSec(props.Patch, oaiSecDefs)
-				swaggerSpec.Paths.Paths[k] = props
-			}
-			enrichSwaggerSpec(swaggerSpec, appInfo)
-			swaggerSpec.SecurityDefinitions = oaiSecDefs
+			processSwaggerSpec(swaggerSpec, appInfo, secDefs)
 		},
 	}))
 
@@ -189,14 +177,14 @@ func initRESTV1Services(
 	container.Add(userSrv.RestfulWebService())
 
 	log.Info().Msg("Initializing OAuth 2.0 service...")
-	oauth2Srv, err := oauth2.NewServer(servePath+"/oauth", iamServerCore, loginURL)
+	oauth2Srv, err := oauth2.NewServer(servePath+"/oauth2", iamServerCore, loginURL)
 	if err != nil {
 		log.Fatal().Err(err).Msg("OAuth 2.0 service initialization")
 	}
 	container.Add(oauth2Srv.RestfulWebService())
 }
 
-func enrichSwaggerSpec(swaggerSpec *spec.Swagger, appInfo app.Info) {
+func processSwaggerSpec(swaggerSpec *spec.Swagger, appInfo app.Info, secDefs spec.SecurityDefinitions) {
 	buildInfo := app.GetBuildInfo()
 	rev := buildInfo.RevisionID
 	if rev != "unknown" && len(rev) > 7 {
@@ -209,9 +197,24 @@ func enrichSwaggerSpec(swaggerSpec *spec.Swagger, appInfo app.Info) {
 			Version:     fmt.Sprintf("0.0.0-%s built at %s", rev, buildInfo.Timestamp),
 		},
 	}
+	for k := range swaggerSpec.Paths.Paths {
+		swaggerSpec.Paths.Paths[k] = processOpenAPIPath(swaggerSpec.Paths.Paths[k], secDefs)
+	}
+	swaggerSpec.SecurityDefinitions = secDefs
 }
 
-func processPathOpSec(op *spec.Operation, secDefs spec.SecurityDefinitions) *spec.Operation {
+func processOpenAPIPath(pathItem spec.PathItem, secDefs spec.SecurityDefinitions) spec.PathItem {
+	pathItem.Get = processOpenAPIPathOp(pathItem.Get, secDefs)
+	pathItem.Put = processOpenAPIPathOp(pathItem.Put, secDefs)
+	pathItem.Post = processOpenAPIPathOp(pathItem.Post, secDefs)
+	pathItem.Delete = processOpenAPIPathOp(pathItem.Delete, secDefs)
+	pathItem.Options = processOpenAPIPathOp(pathItem.Options, secDefs)
+	pathItem.Head = processOpenAPIPathOp(pathItem.Head, secDefs)
+	pathItem.Patch = processOpenAPIPathOp(pathItem.Patch, secDefs)
+	return pathItem
+}
+
+func processOpenAPIPathOp(op *spec.Operation, secDefs spec.SecurityDefinitions) *spec.Operation {
 	if op == nil {
 		return nil
 	}
@@ -230,6 +233,7 @@ func processPathOpSec(op *spec.Operation, secDefs spec.SecurityDefinitions) *spe
 			for k, secDef := range secDefs {
 				if strings.HasPrefix(lowerDesc, k) {
 					if secDef.Type == "basic" {
+						// Basic authorization is always as 'Authorization' in the header
 						if p.Name == "Authorization" && p.In == "header" {
 							op.Security = append(op.Security, map[string][]string{k: {}})
 							isSec = true
