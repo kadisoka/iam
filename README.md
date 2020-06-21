@@ -4,9 +4,23 @@ Kadisoka IAM is a service module which provides identity and access
 management subsystem either as separate service (following microservice
 paradigm) or as a library for monolithic service applications.
 
+## Features
+
+* Flexible deployment: standalone service or as a module for your Go application
+* OAuth 2.0 conforming authorization server
+* Web UI which provides good user experience. We want that out of the box,
+  this project provides not only functional, but also good experience for
+  the users.
+* Online and always up-to-date REST API documentation.
+* SMS delivery service integrations (for delivering the OTPs): Vonage (Nexmo),
+  Telesign, Twilio
+* Email delivery service integrations (for delivering the OTPs): Amazon SES
+* Database system support: PostgreSQL
+
 ## Getting Started
 
-This project was designed to use only docker-compose to run locally. Be sure
+This project was designed to use only
+[docker-compose](https://docs.docker.com/compose/) to run locally. Be sure
 to have Docker and docker-compose installed. Go binary distribution is not
 required to be installed on the host.
 
