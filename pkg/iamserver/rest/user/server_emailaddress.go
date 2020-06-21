@@ -17,7 +17,7 @@ func (restSrv *Server) putUserEmailAddress(
 ) {
 	reqCtx, err := restSrv.RESTRequestContext(req.Request)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msgf("Unable to load request authorization: %v", err)
 		rest.RespondTo(resp).EmptyError(
 			http.StatusBadRequest)
@@ -27,7 +27,7 @@ func (restSrv *Server) putUserEmailAddress(
 	var reqEntity UserEmailAddressPutRequestJSONV1
 	err = req.ReadEntity(&reqEntity)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msgf("Unable to read request body: %v", err)
 		rest.RespondTo(resp).EmptyError(
 			http.StatusBadRequest)
@@ -37,7 +37,7 @@ func (restSrv *Server) putUserEmailAddress(
 	emailAddress := reqEntity.EmailAddress
 	parsedEmailAddress, err := iam.EmailAddressFromString(emailAddress)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msgf("Email address %v, is not valid", emailAddress)
 		rest.RespondTo(resp).EmptyError(
 			http.StatusBadRequest)
@@ -65,7 +65,7 @@ func (restSrv *Server) handleSetEmailAddress(
 ) {
 	authCtx := reqCtx.Authorization()
 	if authCtx.IsNotValid() && !authCtx.IsUserContext() {
-		log.WithContext(reqCtx).Warn().Msgf("Unauthorized")
+		logCtx(reqCtx).Warn().Msgf("Unauthorized")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusUnauthorized)
 		return
@@ -74,13 +74,13 @@ func (restSrv *Server) handleSetEmailAddress(
 	if targetUserIDStr := req.PathParameter("user-id"); targetUserIDStr != "" && targetUserIDStr != "me" {
 		targetUserID, err := iam.UserIDFromString(targetUserIDStr)
 		if err != nil {
-			log.WithContext(reqCtx).Warn().Msgf("Invalid user ID: %v", err)
+			logCtx(reqCtx).Warn().Msgf("Invalid user ID: %v", err)
 			rest.RespondTo(resp).EmptyError(
 				http.StatusBadRequest)
 			return
 		}
 		if targetUserID != authCtx.UserID {
-			log.WithContext(reqCtx).Warn().Msgf("Setting other user's email address is not allowed")
+			logCtx(reqCtx).Warn().Msgf("Setting other user's email address is not allowed")
 			rest.RespondTo(resp).EmptyError(
 				http.StatusForbidden)
 			return
@@ -92,14 +92,14 @@ func (restSrv *Server) handleSetEmailAddress(
 			reqCtx, authCtx.UserID, emailAddress, verificationMethods)
 	if err != nil {
 		if errors.IsCallError(err) {
-			log.WithContext(reqCtx).
+			logCtx(reqCtx).
 				Warn().Msgf("SetUserPrimaryEmailAddress to %v: %v",
 				emailAddress, err)
 			rest.RespondTo(resp).EmptyError(
 				http.StatusBadRequest)
 			return
 		}
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Error().Msgf("SetUserPrimaryEmailAddress to %v: %v",
 			emailAddress, err)
 		rest.RespondTo(resp).EmptyError(
@@ -127,7 +127,7 @@ func (restSrv *Server) postUserEmailAddressVerificationConfirmation(
 ) {
 	reqCtx, err := restSrv.RESTRequestContext(req.Request)
 	if !reqCtx.IsUserContext() {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msgf("Unauthorized: %v", err)
 		rest.RespondTo(resp).EmptyError(
 			http.StatusUnauthorized)
@@ -137,7 +137,7 @@ func (restSrv *Server) postUserEmailAddressVerificationConfirmation(
 	var reqEntity UserEmailAddressVerificationConfirmationPostRequest
 	err = req.ReadEntity(&reqEntity)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msgf("Unable to load request content: %v", err)
 		rest.RespondTo(resp).EmptyError(
 			http.StatusBadRequest)
@@ -149,14 +149,14 @@ func (restSrv *Server) postUserEmailAddressVerificationConfirmation(
 			reqCtx, reqEntity.VerificationID, reqEntity.Code)
 	if err != nil {
 		if errors.IsCallError(err) {
-			log.WithContext(reqCtx).
+			logCtx(reqCtx).
 				Warn().Msgf("ConfirmUserEmailAddressVerification %v failed: %v",
 				reqEntity.VerificationID, err)
 			rest.RespondTo(resp).EmptyError(
 				http.StatusBadRequest)
 			return
 		}
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Error().Msgf("ConfirmUserEmailAddressVerification %v failed: %v",
 			reqEntity.VerificationID, err)
 		rest.RespondTo(resp).EmptyError(

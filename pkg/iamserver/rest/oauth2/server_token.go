@@ -20,16 +20,16 @@ func (restSrv *Server) postToken(req *restful.Request, resp *restful.Response) {
 
 	err := req.Request.ParseForm()
 	if err != nil {
-		log.WithRequest(req.Request).
-			Warn().Msgf("unable to parse form: %v", err)
+		logReq(req.Request).
+			Warn().Err(err).Msg("Form parsing")
 		oauth2.RespondTo(resp).ErrorCode(
 			oauth2.ErrorInvalidRequest)
 		return
 	}
 	grantTypeArgVal := req.Request.FormValue("grant_type")
 	if grantTypeArgVal == "" {
-		log.WithRequest(req.Request).
-			Warn().Msgf("Empty grant_type")
+		logReq(req.Request).
+			Warn().Msg("Empty grant_type")
 		oauth2.RespondTo(resp).ErrorCode(
 			oauth2.ErrorInvalidRequest)
 		return
@@ -46,7 +46,7 @@ func (restSrv *Server) postToken(req *restful.Request, resp *restful.Response) {
 	case oauth2.GrantTypePassword:
 		// Note: we are currently disabling this grant type until we have
 		// implemented rate limiter for handleTokenRequestByPasswordGrant
-		log.WithRequest(req.Request).
+		logReq(req.Request).
 			Warn().Msgf("Grant type is currently disabled: %v", grantType)
 		oauth2.RespondTo(resp).ErrorCode(
 			oauth2.ErrorUnsupportedGrantType)
@@ -58,13 +58,13 @@ func (restSrv *Server) postToken(req *restful.Request, resp *restful.Response) {
 		// issue another access token if the previous token is about to
 		// expire (e.g., < 10 min from expiration), otherwise, we could reuse
 		// the previously issued access token (check the authorization ID).
-		log.WithRequest(req.Request).
+		logReq(req.Request).
 			Warn().Msgf("Unsupported grant_type: %v", grantType)
 		oauth2.RespondTo(resp).ErrorCode(
 			oauth2.ErrorUnsupportedGrantType)
 		return
 	default:
-		log.WithRequest(req.Request).
+		logReq(req.Request).
 			Warn().Msgf("Unsupported grant_type: %v", grantType)
 		oauth2.RespondTo(resp).ErrorCode(
 			oauth2.ErrorUnsupportedGrantType)

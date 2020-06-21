@@ -107,7 +107,7 @@ func NewServer(
 	container.EnableContentEncoding(true)
 	container.ServiceErrorHandler(
 		func(err restful.ServiceError, req *restful.Request, resp *restful.Response) {
-			log.WithRequest(req.Request).
+			logReq(req.Request).
 				Warn().Int("status_code", err.Code).Str("err_msg", err.Message).
 				Msg("Routing error")
 			resp.WriteErrorString(err.Code, err.Message)

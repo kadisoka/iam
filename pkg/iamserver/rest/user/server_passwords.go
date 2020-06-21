@@ -15,7 +15,7 @@ type userPasswordPutRequest struct {
 func (restSrv *Server) putUserPassword(req *restful.Request, resp *restful.Response) {
 	reqCtx, err := restSrv.RESTRequestContext(req.Request)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Err(err).Msg("Request context")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusInternalServerError)
@@ -23,7 +23,7 @@ func (restSrv *Server) putUserPassword(req *restful.Request, resp *restful.Respo
 	}
 	authCtx := reqCtx.Authorization()
 	if authCtx.IsNotValid() || !authCtx.IsUserContext() {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Err(err).Msg("Unauthorized")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusUnauthorized)
@@ -33,7 +33,7 @@ func (restSrv *Server) putUserPassword(req *restful.Request, resp *restful.Respo
 	var reqBody userPasswordPutRequest
 	err = req.ReadEntity(&reqBody)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Err(err).Msg("Request body parsing")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusBadRequest)
@@ -43,7 +43,7 @@ func (restSrv *Server) putUserPassword(req *restful.Request, resp *restful.Respo
 	matched, err := restSrv.serverCore.
 		MatchUserPassword(authCtx.UserID, reqBody.OldPassword)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Err(err).Msg("Passwords matching")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusInternalServerError)
@@ -51,7 +51,7 @@ func (restSrv *Server) putUserPassword(req *restful.Request, resp *restful.Respo
 	}
 
 	if !matched {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msg("Passwords mismatch")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusBadRequest)
@@ -60,7 +60,7 @@ func (restSrv *Server) putUserPassword(req *restful.Request, resp *restful.Respo
 
 	password := reqBody.Password
 	if password == "" {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msg("Password empty")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusBadRequest)
@@ -70,7 +70,7 @@ func (restSrv *Server) putUserPassword(req *restful.Request, resp *restful.Respo
 	err = restSrv.serverCore.
 		SetUserPassword(reqCtx, authCtx.UserID, password)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Err(err).Msg("User password update")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusInternalServerError)

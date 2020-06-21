@@ -20,10 +20,10 @@ func (restSrv *Server) handleTokenRequestByClientCredentials(
 		AuthenticateClientAuthorization(req.Request)
 	if reqClient == nil {
 		if err != nil {
-			log.WithRequest(req.Request).
+			logReq(req.Request).
 				Warn().Err(err).Msg("Client authentication")
 		} else {
-			log.WithRequest(req.Request).
+			logReq(req.Request).
 				Warn().Msg("No authorized client")
 		}
 		// RFC 6749 § 5.2
@@ -34,7 +34,7 @@ func (restSrv *Server) handleTokenRequestByClientCredentials(
 
 	// To use this grant type, the client must be able to secure its credentials.
 	if !reqClient.ID.IsConfidential() {
-		log.WithRequest(req.Request).
+		logReq(req.Request).
 			Warn().Msgf("Client %v is not allowed to use grant type 'client_credentials'", reqClient.ID)
 		oauth2.RespondTo(resp).ErrorCode(
 			oauth2.ErrorUnauthorizedClient)
@@ -43,7 +43,7 @@ func (restSrv *Server) handleTokenRequestByClientCredentials(
 
 	reqCtx, err := restSrv.RESTRequestContext(req.Request)
 	if err != nil && err != iam.ErrReqFieldAuthorizationTypeUnsupported {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Err(err).Msg("Unable to read authorization")
 		oauth2.RespondTo(resp).ErrorCode(
 			oauth2.ErrorServerError)
@@ -51,7 +51,7 @@ func (restSrv *Server) handleTokenRequestByClientCredentials(
 	}
 	authCtx := reqCtx.Authorization()
 	if authCtx.IsValid() {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msg("Authorization context must not be valid")
 		oauth2.RespondTo(resp).ErrorCode(
 			oauth2.ErrorServerError)
@@ -77,7 +77,7 @@ func (restSrv *Server) handleTokenRequestByClientCredentials(
 			VerificationID:     0,
 		})
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Error().Msgf("RegisterTerminal: %v", err)
 		oauth2.RespondTo(resp).ErrorCode(
 			oauth2.ErrorServerError)
@@ -87,7 +87,7 @@ func (restSrv *Server) handleTokenRequestByClientCredentials(
 	accessToken, err := restSrv.serverCore.
 		GenerateAccessTokenJWT(reqCtx, termID, authCtx.UserID)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Error().Msgf("GenerateAccessTokenJWT: %v", err)
 		oauth2.RespondTo(resp).ErrorCode(
 			oauth2.ErrorServerError)
@@ -98,7 +98,7 @@ func (restSrv *Server) handleTokenRequestByClientCredentials(
 	refreshToken, err := restSrv.serverCore.
 		GenerateRefreshTokenJWT(termID, termSecret)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Error().Msgf("GenerateRefreshTokenJWT: %v", err)
 		oauth2.RespondTo(resp).ErrorCode(
 			oauth2.ErrorServerError)

@@ -4,4 +4,7 @@ import (
 	"github.com/kadisoka/iam/pkg/iam/rest/logging"
 )
 
-var log = logging.NewPkgLogger()
+var (
+	log    = logging.NewPkgLogger()
+	logReq = log.WithRequest
+)

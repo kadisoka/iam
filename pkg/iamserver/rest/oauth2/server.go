@@ -14,7 +14,11 @@ import (
 	"github.com/kadisoka/iam/pkg/jose/jwk"
 )
 
-var log = logging.NewPkgLogger()
+var (
+	log    = logging.NewPkgLogger()
+	logCtx = log.WithContext
+	logReq = log.WithRequest
+)
 
 // New instantiates an Server.
 func NewServer(

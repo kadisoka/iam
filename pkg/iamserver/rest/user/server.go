@@ -19,7 +19,10 @@ const (
 	phoneNumberListLengthMax = 50
 )
 
-var log = logging.NewPkgLogger()
+var (
+	log    = logging.NewPkgLogger()
+	logCtx = log.WithContext
+)
 
 func NewServer(
 	basePath string,
@@ -210,7 +213,7 @@ func (restSrv *Server) RestfulWebService() *restful.WebService {
 func (restSrv *Server) getUser(req *restful.Request, resp *restful.Response) {
 	reqCtx, err := restSrv.RESTRequestContext(req.Request)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Err(err).Msg("Request context")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusInternalServerError)
@@ -218,7 +221,7 @@ func (restSrv *Server) getUser(req *restful.Request, resp *restful.Response) {
 	}
 	authCtx := reqCtx.Authorization()
 	if authCtx.IsNotValid() {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Err(err).Msg("Unauthorized")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusUnauthorized)
@@ -227,7 +230,7 @@ func (restSrv *Server) getUser(req *restful.Request, resp *restful.Response) {
 
 	requestedUserIDStr := req.PathParameter("user-id")
 	if requestedUserIDStr == "" {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msg("Invalid parameter value path.user-id: empty")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusBadRequest)
@@ -237,7 +240,7 @@ func (restSrv *Server) getUser(req *restful.Request, resp *restful.Response) {
 	var requestedUserID iam.UserID
 	if requestedUserIDStr == "me" {
 		if !reqCtx.IsUserContext() {
-			log.WithContext(reqCtx).
+			logCtx(reqCtx).
 				Warn().Msg("Invalid request: 'me' can only be used with user access token")
 			rest.RespondTo(resp).EmptyError(
 				http.StatusBadRequest)
@@ -247,7 +250,7 @@ func (restSrv *Server) getUser(req *restful.Request, resp *restful.Response) {
 	} else {
 		requestedUserID, err = iam.UserIDFromString(requestedUserIDStr)
 		if err != nil {
-			log.WithContext(reqCtx).
+			logCtx(reqCtx).
 				Warn().Err(err).Msg("Invalid parameter value path.user-id")
 			rest.RespondTo(resp).EmptyError(
 				http.StatusBadRequest)
@@ -268,7 +271,7 @@ func (restSrv *Server) getUser(req *restful.Request, resp *restful.Response) {
 	userBaseProfile, err := restSrv.serverCore.
 		GetUserBaseProfile(reqCtx, requestedUserID)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Err(err).Msg("User base profile fetch")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusInternalServerError)
@@ -280,7 +283,7 @@ func (restSrv *Server) getUser(req *restful.Request, resp *restful.Response) {
 	userPhoneNumber, err := restSrv.serverCore.
 		GetUserPrimaryPhoneNumber(reqCtx, requestedUserID)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Err(err).Msg("User phone number fetch")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusInternalServerError)
@@ -295,7 +298,7 @@ func (restSrv *Server) getUser(req *restful.Request, resp *restful.Response) {
 	userEmailAddress, err := restSrv.serverCore.
 		GetUserPrimaryEmailAddress(reqCtx, requestedUserID)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Err(err).Msg("User email address fetch")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusInternalServerError)
@@ -311,7 +314,7 @@ func (restSrv *Server) getUser(req *restful.Request, resp *restful.Response) {
 func (restSrv *Server) getUsersByPhoneNumbers(req *restful.Request, resp *restful.Response) {
 	reqCtx, err := restSrv.RESTRequestContext(req.Request)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Err(err).Msg("Request context")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusInternalServerError)
@@ -319,7 +322,7 @@ func (restSrv *Server) getUsersByPhoneNumbers(req *restful.Request, resp *restfu
 	}
 	authCtx := reqCtx.Authorization()
 	if authCtx.IsNotValid() {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Err(err).Msg("Unauthorized")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusUnauthorized)
@@ -330,14 +333,14 @@ func (restSrv *Server) getUsersByPhoneNumbers(req *restful.Request, resp *restfu
 	// use encoding/csv if it became more complex
 	phoneNumberStrList := strings.Split(req.QueryParameter("phone_numbers"), ",")
 	if len(phoneNumberStrList) == 0 {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msg("Phone number list empty")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusBadRequest)
 		return
 	}
 	if len(phoneNumberStrList) > phoneNumberListLengthMax {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msgf(
 			"Phone number list is too large at %d (max. %d)", len(phoneNumberStrList), phoneNumberListLengthMax)
 		rest.RespondTo(resp).EmptyError(
@@ -368,7 +371,7 @@ func (restSrv *Server) getUsersByPhoneNumbers(req *restful.Request, resp *restfu
 	}
 
 	if len(unparseablePhoneNumbers) > 0 || len(invalidPhoneNumbers) > 0 {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().
 			Strs("unparsable", unparseablePhoneNumbers).
 			Strs("invalid", invalidPhoneNumbers).
@@ -397,7 +400,7 @@ func (restSrv *Server) getUsersByPhoneNumbers(req *restful.Request, resp *restfu
 func (restSrv *Server) getUserContacts(req *restful.Request, resp *restful.Response) {
 	reqCtx, err := restSrv.RESTRequestContext(req.Request)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Err(err).Msg("Request context")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusInternalServerError)
@@ -405,7 +408,7 @@ func (restSrv *Server) getUserContacts(req *restful.Request, resp *restful.Respo
 	}
 	authCtx := reqCtx.Authorization()
 	if authCtx.IsNotValid() || !authCtx.IsUserContext() {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Err(err).Msg("Unauthorized")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusUnauthorized)
@@ -419,7 +422,7 @@ func (restSrv *Server) getUserContacts(req *restful.Request, resp *restful.Respo
 		reqCtx, authCtx.UserID)
 
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Err(err).Msg("User contacts user ID fetch")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusInternalServerError)

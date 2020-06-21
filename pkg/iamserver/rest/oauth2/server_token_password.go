@@ -17,7 +17,7 @@ func (restSrv *Server) handleTokenRequestByPasswordGrant(
 	reqClient, err := restSrv.serverCore.
 		AuthenticateClientAuthorization(req.Request)
 	if err != nil {
-		log.WithRequest(req.Request).
+		logReq(req.Request).
 			Warn().Err(err).Msg("Client authentication")
 		// RFC 6749 § 5.2
 		oauth2.RespondTo(resp).ErrInvalidClientBasicAuthorization(
@@ -26,7 +26,7 @@ func (restSrv *Server) handleTokenRequestByPasswordGrant(
 	}
 
 	if reqClient != nil && reqClient.ID.IsValid() && (!reqClient.ID.IsUserAgent() || !reqClient.ID.IsConfidential()) {
-		log.WithRequest(req.Request).
+		logReq(req.Request).
 			Warn().Msgf("Client %v is not authorized to use grant type password", reqClient.ID)
 		oauth2.RespondTo(resp).ErrorCode(
 			oauth2.ErrorUnauthorizedClient)
@@ -35,7 +35,7 @@ func (restSrv *Server) handleTokenRequestByPasswordGrant(
 
 	reqCtx, err := restSrv.RESTRequestContext(req.Request)
 	if err != nil && err != iam.ErrReqFieldAuthorizationTypeUnsupported {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msgf("Unable to read authorization: %v", err)
 		oauth2.RespondTo(resp).ErrorCode(
 			oauth2.ErrorServerError)
@@ -43,7 +43,7 @@ func (restSrv *Server) handleTokenRequestByPasswordGrant(
 	}
 	authCtx := reqCtx.Authorization()
 	if authCtx.IsValid() {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msgf("Authorization context must not be valid")
 		oauth2.RespondTo(resp).ErrorCode(
 			oauth2.ErrorServerError)
@@ -66,12 +66,12 @@ func (restSrv *Server) handleTokenRequestByPasswordGrant(
 				reqCtx, resp, reqClient, names[1], password)
 			return
 		default:
-			log.WithRequest(req.Request).
+			logReq(req.Request).
 				Warn().Msgf("Unrecognized identifier scheme: %v", names[0])
 		}
 	}
 
-	log.WithRequest(req.Request).
+	logReq(req.Request).
 		Warn().Msgf("Password grant with no scheme.")
 	oauth2.RespondTo(resp).ErrorCode(
 		oauth2.ErrorInvalidGrant)
@@ -86,7 +86,7 @@ func (restSrv *Server) handleTokenRequestByPasswordGrantWithTerminalCreds(
 ) {
 	terminalID, err := iam.TerminalIDFromString(terminalIDStr)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msgf("Unable to parse username %q as TerminalID: %v", terminalIDStr, err)
 		oauth2.RespondTo(resp).ErrorCode(
 			oauth2.ErrorInvalidGrant)
@@ -96,14 +96,14 @@ func (restSrv *Server) handleTokenRequestByPasswordGrantWithTerminalCreds(
 	authOK, userID, err := restSrv.serverCore.
 		AuthenticateTerminal(terminalID, terminalSecret)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Error().Msgf("Terminal %v authentication failed: %v", terminalID, err)
 		oauth2.RespondTo(resp).ErrorCode(
 			oauth2.ErrorServerError)
 		return
 	}
 	if !authOK {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msgf("Terminal %v authentication failed", terminalID)
 		oauth2.RespondTo(resp).ErrorCode(
 			oauth2.ErrorInvalidGrant)
@@ -114,7 +114,7 @@ func (restSrv *Server) handleTokenRequestByPasswordGrantWithTerminalCreds(
 		userAccountState, err := restSrv.serverCore.
 			GetUserAccountState(userID)
 		if err != nil {
-			log.WithContext(reqCtx).
+			logCtx(reqCtx).
 				Warn().Msgf("Terminal %v user account state: %v", terminalID, err)
 			oauth2.RespondTo(resp).ErrorCode(
 				oauth2.ErrorServerError)
@@ -127,7 +127,7 @@ func (restSrv *Server) handleTokenRequestByPasswordGrantWithTerminalCreds(
 			} else {
 				status = "deleted"
 			}
-			log.WithContext(reqCtx).
+			logCtx(reqCtx).
 				Warn().Msgf("User %v %s", userID, status)
 			oauth2.RespondTo(resp).ErrorCode(
 				oauth2.ErrorInvalidGrant)
@@ -137,7 +137,7 @@ func (restSrv *Server) handleTokenRequestByPasswordGrantWithTerminalCreds(
 
 	if reqClient != nil {
 		if reqClient.ID != terminalID.ClientID() {
-			log.WithContext(reqCtx).
+			logCtx(reqCtx).
 				Error().Msgf("Terminal %v is not associated to client %v", terminalID, reqClient.ID)
 			oauth2.RespondTo(resp).ErrorCode(
 				oauth2.ErrorServerError)

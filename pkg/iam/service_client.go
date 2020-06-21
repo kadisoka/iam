@@ -46,13 +46,18 @@ type ServiceClientAuth interface {
 	) (accessToken string, err error)
 }
 
+const (
+	serverOAuth2JWKSPath  = "/oauth2/jwks"
+	serverOAuth2TokenPath = "/oauth2/token"
+)
+
 func NewServiceClientSimple(instID string, envPrefix string) (ServiceClient, error) {
 	cfg, err := ServiceClientConfigFromEnv(envPrefix, nil)
 	if err != nil {
 		return nil, errors.Wrap("config loading", err)
 	}
 
-	jwksURL := cfg.ServerBaseURL + "/oauth/jwks"
+	jwksURL := cfg.ServerBaseURL + serverOAuth2JWKSPath
 	var jwtKeyChain JWTKeyChain
 	_, err = jwtKeyChain.LoadVerifierKeysFromJWKSetByURL(jwksURL)
 	if err != nil {
@@ -150,7 +155,7 @@ func (svcClient *ServiceClientCore) obtainAccessTokenByClientCredentials(
 	if !strings.HasPrefix(baseURL, "http") {
 		return TerminalIDZero, "", errors.New("iam server base URL is not configured")
 	}
-	tokenEndpointURL := baseURL + "/oauth/token"
+	tokenEndpointURL := baseURL + serverOAuth2TokenPath
 
 	payloadStr, err := oauth2.QueryString(oauth2.AccessTokenRequest{
 		GrantType: oauth2.GrantTypeClientCredentials,
@@ -226,7 +231,7 @@ func (svcClient *ServiceClientCore) AccessTokenByAuthorizationCodeGrant(
 	if !strings.HasPrefix(baseURL, "http") {
 		return "", errors.New("iam server base URL is not configured")
 	}
-	tokenEndpointURL := baseURL + "/oauth/token"
+	tokenEndpointURL := baseURL + serverOAuth2TokenPath
 
 	//TODO: redirect_uri is required
 	payloadStr, err := oauth2.QueryString(oauth2.AccessTokenRequest{

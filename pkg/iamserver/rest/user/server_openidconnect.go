@@ -18,7 +18,7 @@ func (restSrv *Server) getUserOpenIDConnectUserInfo(
 ) {
 	reqCtx, err := restSrv.RESTRequestContext(req.Request)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Err(err).Msg("Request context")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusInternalServerError)
@@ -26,7 +26,7 @@ func (restSrv *Server) getUserOpenIDConnectUserInfo(
 	}
 	authCtx := reqCtx.Authorization()
 	if authCtx.IsNotValid() {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Err(err).Msg("Unauthorized")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusUnauthorized)
@@ -39,7 +39,7 @@ func (restSrv *Server) getUserOpenIDConnectUserInfo(
 	userBaseProfile, err := restSrv.serverCore.
 		GetUserBaseProfile(reqCtx, requestedUserID)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Err(err).Msg("User base profile fetch")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusInternalServerError)
@@ -49,7 +49,7 @@ func (restSrv *Server) getUserOpenIDConnectUserInfo(
 	userPhoneNumber, err := restSrv.serverCore.
 		GetUserPrimaryPhoneNumber(reqCtx, requestedUserID)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Err(err).Msg("User phone number fetch")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusInternalServerError)
@@ -67,7 +67,7 @@ func (restSrv *Server) getUserOpenIDConnectUserInfo(
 	userEmailAddress, err := restSrv.serverCore.
 		GetUserPrimaryEmailAddress(reqCtx, requestedUserID)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Err(err).Msg("User email address fetch")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusInternalServerError)

@@ -27,7 +27,7 @@ func (restSrv *Server) getAuthorize(req *restful.Request, resp *restful.Response
 	inQuery := r.URL.Query()
 	val, err := oauth2.AuthorizationRequestFromURLValues(inQuery)
 	if err != nil {
-		log.WithRequest(r).
+		logReq(r).
 			Error().Msgf("unable to decode query: %v", err)
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("404 Not Found"))
@@ -43,8 +43,8 @@ func (restSrv *Server) getAuthorize(req *restful.Request, resp *restful.Response
 
 	//TODO: support OOB
 	if val.RedirectURI != "" && !strings.HasPrefix(val.RedirectURI, "http") {
-		log.WithRequest(r).
-			Warn().Msgf("redirect_uri invalid")
+		logReq(r).
+			Warn().Msg("redirect_uri invalid")
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("404 Not Found"))
 		return
@@ -53,14 +53,14 @@ func (restSrv *Server) getAuthorize(req *restful.Request, resp *restful.Response
 	//TODO: validate inputs
 	if val.ClientID == "" {
 		if val.RedirectURI == "" {
-			log.WithRequest(r).
-				Warn().Msgf("client_id invalid and no redirect_uri")
+			logReq(r).
+				Warn().Msg("client_id invalid and no redirect_uri")
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte("404 Not Found"))
 			return
 		}
-		log.WithRequest(r).
-			Warn().Msgf("client_id missing")
+		logReq(r).
+			Warn().Msg("client_id missing")
 		cbURL := val.RedirectURI + "?" + oauth2.MustQueryString(oauth2.ErrorResponse{
 			Error: oauth2.ErrorInvalidRequest,
 			State: val.State,
@@ -71,8 +71,8 @@ func (restSrv *Server) getAuthorize(req *restful.Request, resp *restful.Response
 
 	clientID, err := iam.ClientIDFromString(val.ClientID)
 	if err != nil {
-		log.WithRequest(r).
-			Warn().Msgf("client_id malformed: %v", err)
+		logReq(r).
+			Warn().Err(err).Msg("client_id malformed")
 		cbURL := val.RedirectURI + "?" + oauth2.MustQueryString(oauth2.ErrorResponse{
 			Error: oauth2.ErrorInvalidRequest,
 			State: val.State,
@@ -81,8 +81,8 @@ func (restSrv *Server) getAuthorize(req *restful.Request, resp *restful.Response
 		return
 	}
 	if clientID.IsNotValid() {
-		log.WithRequest(r).
-			Warn().Msgf("client_id is invalid: %v", err)
+		logReq(r).
+			Warn().Err(err).Msg("client_id is invalid")
 		cbURL := val.RedirectURI + "?" + oauth2.MustQueryString(oauth2.ErrorResponse{
 			Error: oauth2.ErrorInvalidRequest,
 			State: val.State,
@@ -92,8 +92,8 @@ func (restSrv *Server) getAuthorize(req *restful.Request, resp *restful.Response
 	}
 	clientData, err := restSrv.serverCore.ClientByID(clientID)
 	if err != nil || clientData == nil {
-		log.WithRequest(r).
-			Warn().Msgf("client_id does not refer a valid client: %v", err)
+		logReq(r).
+			Warn().Err(err).Msg("client_id does not refer a valid client")
 		cbURL := val.RedirectURI + "?" + oauth2.MustQueryString(oauth2.ErrorResponse{
 			Error: oauth2.ErrorInvalidRequest,
 			State: val.State,
@@ -102,8 +102,8 @@ func (restSrv *Server) getAuthorize(req *restful.Request, resp *restful.Response
 		return
 	}
 	if val.RedirectURI != "" && !clientData.HasOAuth2RedirectURI(val.RedirectURI) {
-		log.WithRequest(r).
-			Warn().Msgf("redirect_uri mismatch: %v", err)
+		logReq(r).
+			Warn().Msgf("redirect_uri unrecognized %v", val.RedirectURI)
 		cbURL := val.RedirectURI + "?" + oauth2.MustQueryString(oauth2.ErrorResponse{
 			Error: oauth2.ErrorInvalidRequest,
 			State: val.State,
@@ -124,8 +124,8 @@ func (restSrv *Server) getAuthorize(req *restful.Request, resp *restful.Response
 func (restSrv *Server) postAuthorize(req *restful.Request, resp *restful.Response) {
 	reqCtx, err := restSrv.RESTRequestContext(req.Request)
 	if !reqCtx.IsUserContext() {
-		log.WithContext(reqCtx).
-			Warn().Msgf("Unauthorized: %v", err)
+		logCtx(reqCtx).
+			Warn().Err(err).Msg("Unauthorized")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusUnauthorized)
 		return
@@ -134,8 +134,8 @@ func (restSrv *Server) postAuthorize(req *restful.Request, resp *restful.Respons
 	clientIDArgVal, _ := req.BodyParameter("client_id")
 	clientID, err := iam.ClientIDFromString(clientIDArgVal)
 	if err != nil {
-		log.WithContext(reqCtx).
-			Warn().Msgf("Invalid field form.client_id %v: %v", clientIDArgVal, err)
+		logCtx(reqCtx).
+			Warn().Err(err).Msgf("Invalid field form.client_id %v", clientIDArgVal)
 		rest.RespondTo(resp).EmptyError(
 			http.StatusBadRequest)
 		return
@@ -144,7 +144,7 @@ func (restSrv *Server) postAuthorize(req *restful.Request, resp *restful.Respons
 	responseTypeArgVal, _ := req.BodyParameter("response_type")
 	responseType := oauth2.ResponseTypeFromString(responseTypeArgVal)
 	if responseType != oauth2.ResponseTypeCode {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msgf("Invalid field form.response_type %v: unexpected value", responseType)
 		rest.RespondTo(resp).EmptyError(
 			http.StatusBadRequest)
@@ -156,14 +156,14 @@ func (restSrv *Server) postAuthorize(req *restful.Request, resp *restful.Respons
 		panic(err)
 	}
 	if client == nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msgf("Invalid client ID: %v", clientID)
 		rest.RespondTo(resp).EmptyError(
 			http.StatusBadRequest)
 		return
 	}
 	if !clientID.IsConfidential() && !clientID.IsUserAgent() {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msgf("Invalid client type for ID %v", clientID)
 		rest.RespondTo(resp).EmptyError(
 			http.StatusBadRequest)
@@ -172,7 +172,7 @@ func (restSrv *Server) postAuthorize(req *restful.Request, resp *restful.Respons
 
 	redirectURIStr, _ := req.BodyParameter("redirect_uri")
 	if redirectURIStr != "" && !client.HasOAuth2RedirectURI(redirectURIStr) {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msgf("Redirect URI mismatch for client %v. Got %v , expecting %v .",
 			clientID, redirectURIStr, client.OAuth2RedirectURI)
 		rest.RespondTo(resp).EmptyError(
@@ -267,14 +267,14 @@ func (restSrv *Server) parseRequestAcceptLanguage(
 ) (termLangStrings []string) {
 	termLangTags, _, err := language.ParseAcceptLanguage(defaultPreferredLanguages)
 	if defaultPreferredLanguages != "" && err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msgf("Unable to parse preferred languages from body %q: %v", defaultPreferredLanguages, err)
 	}
 	if len(termLangTags) == 0 || err != nil {
 		var headerLangTags []language.Tag
 		headerLangTags, _, err = language.ParseAcceptLanguage(req.Request.Header.Get("Accept-Language"))
 		if err != nil {
-			log.WithContext(reqCtx).
+			logCtx(reqCtx).
 				Warn().Msgf("Unable to parse preferred languages from HTTP header: %v", err)
 		} else {
 			if len(headerLangTags) > 0 {

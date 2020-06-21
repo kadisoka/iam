@@ -43,7 +43,7 @@ func (authServer *TerminalAuthorizationServiceServer) InitiateUserTerminalAuthor
 	}
 	authCtx := reqCtx.Authorization()
 	if authCtx.IsValid() {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msgf("Authorization context must not be valid: %#v", reqCtx)
 		return nil, grpcstatus.Error(grpccodes.Unauthenticated, "")
 	}
@@ -65,7 +65,7 @@ func (authServer *TerminalAuthorizationServiceServer) InitiateUserTerminalAuthor
 
 	phoneNumber, err := iam.PhoneNumberFromString(reqProto.PhoneNumber)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Err(err).Str("phone_number", reqProto.PhoneNumber).Msg("Phone number format")
 		return nil, grpcstatus.Error(grpccodes.InvalidArgument, "")
 	}
@@ -78,12 +78,12 @@ func (authServer *TerminalAuthorizationServiceServer) InitiateUserTerminalAuthor
 	if err != nil {
 		switch err.(type) {
 		case errors.CallError:
-			log.WithContext(reqCtx).
+			logCtx(reqCtx).
 				Warn().Err(err).Msgf("StartTerminalAuthorizationByPhoneNumber with %v failed",
 				phoneNumber)
 			return nil, grpcstatus.Error(grpccodes.InvalidArgument, "")
 		}
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Err(err).Msgf("StartTerminalAuthorizationByPhoneNumber with %v failed",
 			phoneNumber)
 		return nil, grpcerrs.Error(err)
@@ -112,14 +112,14 @@ func (authServer *TerminalAuthorizationServiceServer) ConfirmTerminalAuthorizati
 	}
 	authCtx := reqCtx.Authorization()
 	if authCtx.IsValid() {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msgf("Authorization context must not be valid: %#v", authCtx)
 		return nil, grpcstatus.Error(grpccodes.Unauthenticated, "")
 	}
 
 	termID, err := iam.TerminalIDFromString(reqProto.TerminalId)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Err(err).Msgf("Unable to parse terminal ID %q", reqProto.TerminalId)
 		return nil, grpcstatus.Error(grpccodes.InvalidArgument, "")
 	}
@@ -128,7 +128,7 @@ func (authServer *TerminalAuthorizationServiceServer) ConfirmTerminalAuthorizati
 		ConfirmTerminalAuthorization(
 			reqCtx, termID, reqProto.VerificationCode)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Err(err).Msgf("Terminal authorization confirm failed: %v")
 		return nil, grpcerrs.Error(err)
 	}
@@ -147,14 +147,14 @@ func (authServer *TerminalAuthorizationServiceServer) GenerateAccessTokenByTermi
 	}
 	authCtx := reqCtx.Authorization()
 	if authCtx.IsValid() {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msgf("Authorization context must not be valid: %#v", authCtx)
 		return nil, grpcstatus.Error(grpccodes.Unauthenticated, "")
 	}
 
 	termID, err := iam.TerminalIDFromString(reqProto.TerminalId)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Err(err).Str("terminal", reqProto.TerminalId).
 			Msg("Terminal ID parsing")
 		return nil, grpcstatus.Error(grpccodes.InvalidArgument, "")
@@ -163,12 +163,12 @@ func (authServer *TerminalAuthorizationServiceServer) GenerateAccessTokenByTermi
 	authOK, userID, err := authServer.iamServerCore.
 		AuthenticateTerminal(termID, reqProto.TerminalSecret)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Err(err).Str("terminal", termID.String()).Msg("Terminal authentication")
 		return nil, grpcerrs.Error(err)
 	}
 	if !authOK {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Str("terminal", termID.String()).Msg("Terminal authentication")
 		return nil, grpcstatus.Error(grpccodes.InvalidArgument, "")
 	}
@@ -177,7 +177,7 @@ func (authServer *TerminalAuthorizationServiceServer) GenerateAccessTokenByTermi
 		userAccountState, err := authServer.iamServerCore.
 			GetUserAccountState(userID)
 		if err != nil {
-			log.WithContext(reqCtx).
+			logCtx(reqCtx).
 				Warn().Err(err).Str("terminal", termID.String()).Msg("Terminal user account state")
 			return nil, grpcerrs.Error(err)
 		}
@@ -188,7 +188,7 @@ func (authServer *TerminalAuthorizationServiceServer) GenerateAccessTokenByTermi
 			} else {
 				status = "deleted"
 			}
-			log.WithContext(reqCtx).
+			logCtx(reqCtx).
 				Warn().Str("terminal", termID.String()).Str("user", userID.String()).
 				Msg("Terminal user account " + status)
 			return nil, grpcstatus.Error(grpccodes.InvalidArgument, "")

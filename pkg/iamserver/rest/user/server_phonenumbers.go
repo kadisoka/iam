@@ -17,14 +17,14 @@ func (restSrv *Server) putUserPhoneNumber(
 ) {
 	reqCtx, err := restSrv.RESTRequestContext(req.Request)
 	if err != nil {
-		log.WithContext(reqCtx).Error().Msgf("Request context: %v", err)
+		logCtx(reqCtx).Error().Msgf("Request context: %v", err)
 		rest.RespondTo(resp).EmptyError(
 			http.StatusInternalServerError)
 		return
 	}
 	authCtx := reqCtx.Authorization()
 	if authCtx.IsNotValid() && !authCtx.IsUserContext() {
-		log.WithContext(reqCtx).Warn().Msgf("Unauthorized: %v", err)
+		logCtx(reqCtx).Warn().Msgf("Unauthorized: %v", err)
 		rest.RespondTo(resp).EmptyError(
 			http.StatusUnauthorized)
 		return
@@ -35,7 +35,7 @@ func (restSrv *Server) putUserPhoneNumber(
 
 	phoneNumber, err := iam.PhoneNumberFromString(reqEntity.PhoneNumber)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msgf("Unable to parse %q as phone number: %v",
 			reqEntity.PhoneNumber, err)
 		rest.RespondTo(resp).EmptyError(
@@ -43,7 +43,7 @@ func (restSrv *Server) putUserPhoneNumber(
 		return
 	}
 	if !phoneNumber.IsValid() {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msgf("Provided phone number %q is invalid", reqEntity.PhoneNumber)
 		rest.RespondTo(resp).EmptyError(
 			http.StatusBadRequest)
@@ -63,14 +63,14 @@ func (restSrv *Server) putUserPhoneNumber(
 			reqCtx, authCtx.UserID, phoneNumber, verificationMethods)
 	if err != nil {
 		if errors.IsCallError(err) {
-			log.WithContext(reqCtx).
+			logCtx(reqCtx).
 				Warn().Msgf("SetUserPrimaryPhoneNumber to %v: %v",
 				phoneNumber, err)
 			rest.RespondTo(resp).EmptyError(
 				http.StatusBadRequest)
 			return
 		}
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Error().Msgf("SetUserPrimaryPhoneNumber to %v: %v",
 			phoneNumber, err)
 		rest.RespondTo(resp).EmptyError(
@@ -98,7 +98,7 @@ func (restSrv *Server) postUserPhoneNumberVerificationConfirmation(
 ) {
 	reqCtx, err := restSrv.RESTRequestContext(req.Request)
 	if !reqCtx.IsUserContext() {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msgf("Unauthorized: %v", err)
 		rest.RespondTo(resp).EmptyError(
 			http.StatusUnauthorized)
@@ -108,7 +108,7 @@ func (restSrv *Server) postUserPhoneNumberVerificationConfirmation(
 	var reqEntity UserPhoneNumberVerificationConfirmationPostRequest
 	err = req.ReadEntity(&reqEntity)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msgf("Unable to load request content: %v", err)
 		rest.RespondTo(resp).EmptyError(
 			http.StatusBadRequest)
@@ -120,14 +120,14 @@ func (restSrv *Server) postUserPhoneNumberVerificationConfirmation(
 			reqCtx, reqEntity.VerificationID, reqEntity.Code)
 	if err != nil {
 		if errors.IsCallError(err) {
-			log.WithContext(reqCtx).
+			logCtx(reqCtx).
 				Warn().Msgf("ConfirmUserPhoneNumberVerification %v failed: %v",
 				reqEntity.VerificationID, err)
 			rest.RespondTo(resp).EmptyError(
 				http.StatusBadRequest)
 			return
 		}
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Error().Msgf("ConfirmUserPhoneNumberVerification %v failed: %v",
 			reqEntity.VerificationID, err)
 		rest.RespondTo(resp).EmptyError(

@@ -7,4 +7,7 @@ import (
 	"github.com/kadisoka/iam/pkg/iam/grpc/logging"
 )
 
-var log = logging.NewPkgLogger()
+var (
+	log    = logging.NewPkgLogger()
+	logCtx = log.WithContext
+)

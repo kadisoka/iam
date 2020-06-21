@@ -71,13 +71,13 @@ type authGetResponse struct {
 func (restSvc *RESTService) getAuth(req *restful.Request, resp *restful.Response) {
 	reqCtx, err := restSvc.iamClient.RESTRequestContext(req.Request)
 	if err != nil {
-		log.WithContext(reqCtx).Err(err).Msg("Request context")
+		logCtx(reqCtx).Err(err).Msg("Request context")
 		resp.WriteHeaderAndJson(http.StatusInternalServerError, &rest.ErrorResponse{}, restful.MIME_JSON)
 		return
 	}
 	authCtx := reqCtx.Authorization()
 	if authCtx.IsUserContext() {
-		log.WithContext(reqCtx).Warn().Msg("Already authorized")
+		logCtx(reqCtx).Warn().Msg("Already authorized")
 		resp.WriteHeaderAndJson(http.StatusOK,
 			&authGetResponse{AccessToken: authCtx.RawToken()},
 			restful.MIME_JSON)
@@ -104,13 +104,13 @@ type helloGetResponse struct {
 func (restSvc *RESTService) getHello(req *restful.Request, resp *restful.Response) {
 	reqCtx, err := restSvc.iamClient.RESTRequestContext(req.Request)
 	if err != nil {
-		log.WithContext(reqCtx).Err(err).Msg("Request context")
+		logCtx(reqCtx).Err(err).Msg("Request context")
 		resp.WriteHeaderAndJson(http.StatusInternalServerError, &rest.ErrorResponse{}, restful.MIME_JSON)
 		return
 	}
 	authCtx := reqCtx.Authorization()
 	if !authCtx.IsUserContext() {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Err(err).Msg("Unauthorized")
 		resp.WriteHeaderAndJson(http.StatusUnauthorized, &rest.ErrorResponse{},
 			restful.MIME_JSON)

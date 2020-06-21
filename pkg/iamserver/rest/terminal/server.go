@@ -19,7 +19,11 @@ import (
 	"github.com/kadisoka/iam/pkg/iamserver/pnv10n"
 )
 
-var log = logging.NewPkgLogger()
+var (
+	log    = logging.NewPkgLogger()
+	logCtx = log.WithContext
+	logReq = log.WithRequest
+)
 
 func NewServer(
 	basePath string,
@@ -106,7 +110,7 @@ func (restSrv *Server) postTerminalsRegister(
 	reqClient, err := restSrv.serverCore.
 		AuthenticateClientAuthorization(req.Request)
 	if err != nil {
-		log.WithRequest(req.Request).
+		logReq(req.Request).
 			Warn().Err(err).Msg("Client authentication")
 		realmName := restSrv.serverCore.RealmName()
 		if realmName == "" {
@@ -119,7 +123,7 @@ func (restSrv *Server) postTerminalsRegister(
 	}
 
 	if reqClient == nil {
-		log.WithRequest(req.Request).
+		logReq(req.Request).
 			Warn().Msg("No authorized client")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusUnauthorized)
@@ -128,7 +132,7 @@ func (restSrv *Server) postTerminalsRegister(
 
 	reqCtx, err := restSrv.RESTRequestContext(req.Request)
 	if err != nil && err != iam.ErrReqFieldAuthorizationTypeUnsupported {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Err(err).Msg("Unable to read authorization")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusInternalServerError)
@@ -136,7 +140,7 @@ func (restSrv *Server) postTerminalsRegister(
 	}
 	authCtx := reqCtx.Authorization()
 	if authCtx.IsValid() {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msg("Authorization context must not be valid")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusUnauthorized)
@@ -146,7 +150,7 @@ func (restSrv *Server) postTerminalsRegister(
 	var terminalRegisterReq iam.TerminalRegisterPostRequestJSONV1
 	err = req.ReadEntity(&terminalRegisterReq)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Err(err).Msg("Unable to read entity from the request body")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusBadRequest)
@@ -154,7 +158,7 @@ func (restSrv *Server) postTerminalsRegister(
 	}
 
 	if terminalRegisterReq.VerificationResourceName == "" {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msg("Resource name is missing")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusBadRequest)
@@ -173,7 +177,7 @@ func (restSrv *Server) postTerminalsRegister(
 			return
 		}
 
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msg("Resource verification type is missing")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusBadRequest)
@@ -191,7 +195,7 @@ func (restSrv *Server) postTerminalsRegister(
 		return
 
 	default:
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msgf("Unsupported verification resource type: %v", terminalRegisterReq.VerificationResourceType)
 		rest.RespondTo(resp).EmptyError(
 			http.StatusBadRequest)
@@ -204,7 +208,7 @@ func (restSrv *Server) postTerminalsSecret(
 ) {
 	reqCtx, err := restSrv.RESTRequestContext(req.Request)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Err(err).Msg("Unable to load authorization")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusBadRequest)
@@ -219,7 +223,7 @@ func (restSrv *Server) postTerminalsSecret(
 
 	userTermID, err := iam.TerminalIDFromString(linkConfirmReq.TerminalID)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Err(err).Msgf("Unable to parse terminal ID %q", linkConfirmReq.TerminalID)
 		rest.RespondTo(resp).EmptyError(
 			http.StatusBadRequest)
@@ -231,21 +235,21 @@ func (restSrv *Server) postTerminalsSecret(
 	if err != nil {
 		switch err {
 		case iam.ErrTerminalVerificationCodeMismatch:
-			log.WithContext(reqCtx).
+			logCtx(reqCtx).
 				Warn().Msgf(
 				"Terminal %v verification code mismatch", linkConfirmReq.TerminalID)
 			rest.RespondTo(resp).EmptyError(
 				http.StatusBadRequest)
 			return
 		case iam.ErrTerminalVerificationCodeExpired:
-			log.WithContext(reqCtx).
+			logCtx(reqCtx).
 				Warn().Msgf(
 				"Terminal %v verification code expired", linkConfirmReq.TerminalID)
 			rest.RespondTo(resp).EmptyError(
 				http.StatusGone)
 			return
 		case iam.ErrTerminalVerificationResourceConflict:
-			log.WithContext(reqCtx).
+			logCtx(reqCtx).
 				Warn().Msgf(
 				"Terminal %v verification resource conflict", linkConfirmReq.TerminalID)
 			rest.RespondTo(resp).EmptyError(
@@ -268,14 +272,14 @@ func (restSrv *Server) putTerminalFCMRegistrationToken(
 ) {
 	reqCtx, err := restSrv.RESTRequestContext(req.Request)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Err(err).Msg("Unable to read authorization")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusInternalServerError)
 		return
 	}
 	if !reqCtx.IsUserContext() {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msg("Unauthorized request")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusUnauthorized)
@@ -290,7 +294,7 @@ func (restSrv *Server) putTerminalFCMRegistrationToken(
 	}
 
 	if fcmRegTokenReq.Token == "" {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msg("Empty token")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusBadRequest)
@@ -317,7 +321,7 @@ func (restSrv *Server) handleTerminalRegisterByPhoneNumber(
 ) {
 	// Only for non-confidential user-agents
 	if clientID := authClient.ID; !clientID.IsPublic() && !clientID.IsUserAgent() {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msgf(
 			"Client %v is not allowed to use this verification resource type", authClient.ID)
 		rest.RespondTo(resp).EmptyError(
@@ -329,7 +333,7 @@ func (restSrv *Server) handleTerminalRegisterByPhoneNumber(
 
 	phoneNumber, err := iam.PhoneNumberFromString(terminalRegisterReq.VerificationResourceName)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Err(err).Msgf(
 			"Unable to parse verification resource name %s of type %s",
 			terminalRegisterReq.VerificationResourceName,
@@ -354,14 +358,14 @@ func (restSrv *Server) handleTerminalRegisterByPhoneNumber(
 			termLangTags, verificationMethods)
 	if err != nil {
 		if errors.IsCallError(err) {
-			log.WithContext(reqCtx).
+			logCtx(reqCtx).
 				Warn().Err(err).Msgf(
 				"StartTerminalAuthorizationByPhoneNumber with %v failed", phoneNumber)
 			rest.RespondTo(resp).EmptyError(
 				http.StatusBadRequest)
 			return
 		}
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Err(err).Msgf(
 			"StartTerminalAuthorizationByPhoneNumber with %v failed", phoneNumber)
 		rest.RespondTo(resp).EmptyError(
@@ -385,7 +389,7 @@ func (restSrv *Server) handleTerminalRegisterByEmailAddress(
 	terminalRegisterReq iam.TerminalRegisterPostRequestJSONV1,
 ) {
 	if clientID := authClient.ID; !clientID.IsPublic() && !clientID.IsUserAgent() {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msgf(
 			"Client %v is not allowed to use this verification resource type", authClient.ID)
 		rest.RespondTo(resp).EmptyError(
@@ -396,7 +400,7 @@ func (restSrv *Server) handleTerminalRegisterByEmailAddress(
 	termLangTags := restSrv.parseRequestAcceptLanguageTags(reqCtx, "")
 	emailAddressStr := terminalRegisterReq.VerificationResourceName
 	if !iam.IsValidEmailAddress(emailAddressStr) {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msgf("Email address %v, is not valid", emailAddressStr)
 		rest.RespondTo(resp).EmptyError(
 			http.StatusBadRequest)
@@ -404,7 +408,7 @@ func (restSrv *Server) handleTerminalRegisterByEmailAddress(
 	}
 	emailAddress, err := iam.EmailAddressFromString(emailAddressStr)
 	if err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Err(err).Msgf(
 			"Unable to parse verification resource name %s of type %s",
 			terminalRegisterReq.VerificationResourceName,
@@ -429,14 +433,14 @@ func (restSrv *Server) handleTerminalRegisterByEmailAddress(
 			termLangTags, verificationMethods)
 	if err != nil {
 		if errors.IsCallError(err) {
-			log.WithContext(reqCtx).
+			logCtx(reqCtx).
 				Warn().Err(err).Msgf("StartTerminalAuthorizationByEmailAddress with %v failed",
 				emailAddress)
 			rest.RespondTo(resp).EmptyError(
 				http.StatusBadRequest)
 			return
 		}
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Err(err).Msgf("StartTerminalAuthorizationByEmailAddress with %v failed",
 			emailAddress)
 		rest.RespondTo(resp).EmptyError(
@@ -460,7 +464,7 @@ func (restSrv *Server) handleTerminalRegisterByImplicit(
 ) {
 	// Only if the client is able to secure its credentials.
 	if !authClient.ID.IsConfidential() {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msgf("Client %v is not allowed to use this verification resource type", authClient.ID)
 		rest.RespondTo(resp).EmptyError(
 			http.StatusForbidden)
@@ -470,7 +474,7 @@ func (restSrv *Server) handleTerminalRegisterByImplicit(
 	authCtx := reqCtx.Authorization()
 	if authCtx.IsUserContext() {
 		//TODO: determine if we should support user context
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Msgf("Client %v is authenticating by implicit grant with valid user context", authClient.ID)
 		rest.RespondTo(resp).EmptyError(
 			http.StatusForbidden)
@@ -521,7 +525,7 @@ func (restSrv *Server) parseRequestAcceptLanguageTags(
 ) (termLangTags []language.Tag) {
 	termLangTags, _, err := language.ParseAcceptLanguage(overrideAcceptLanguage)
 	if overrideAcceptLanguage != "" && err != nil {
-		log.WithContext(reqCtx).
+		logCtx(reqCtx).
 			Warn().Err(err).Msgf("Unable to parse preferred languages from body %q", overrideAcceptLanguage)
 	}
 	if len(termLangTags) == 0 || err != nil {
@@ -530,7 +534,7 @@ func (restSrv *Server) parseRequestAcceptLanguageTags(
 			headerLangTags, _, err = language.
 				ParseAcceptLanguage(httpReq.Header.Get("Accept-Language"))
 			if err != nil {
-				log.WithContext(reqCtx).
+				logCtx(reqCtx).
 					Warn().Err(err).Msg("Unable to parse preferred languages from HTTP header")
 			} else {
 				if len(headerLangTags) > 0 {

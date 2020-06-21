@@ -69,7 +69,7 @@ func (core *Core) ListUsersByPhoneNumber(
 						"ON CONFLICT ON CONSTRAINT user_contact_phone_numbers_pkey DO NOTHING",
 					authCtx.UserID, pn.CountryCode(), pn.NationalNumber(), authCtx.UserID, authCtx.TerminalID())
 				if err != nil {
-					log.WithContext(callCtx).Err(err).Str("phone_number", pn.String()).
+					logCtx(callCtx).Err(err).Str("phone_number", pn.String()).
 						Msg("User contact phone number store")
 				}
 			}
