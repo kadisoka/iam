@@ -12,6 +12,7 @@ paradigm) or as a library for monolithic service applications.
   this project provides not only functional, but also good experience for
   the users.
 * Online and always up-to-date REST API documentation.
+* Non-desctructive data management.
 * Support password-based user authentication
 * SMS delivery service integrations (for delivering the OTPs): Vonage (Nexmo),
   Telesign, Twilio
