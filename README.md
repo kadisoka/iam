@@ -6,14 +6,14 @@ paradigm) or as a library for monolithic service applications.
 
 ## Features
 
-* Flexible deployment: standalone service or as a module for your Go application
+* Flexible deployment: as microservice or as a module for your Go application
 * OAuth 2.0 conforming authorization server
 * Web UI which provides good user experience. We want that out of the box,
   this project provides not only functional, but also good experience for
   the users.
-* Online and always up-to-date REST API documentation.
-* Non-desctructive data management.
-* Support password-based user authentication
+* Online and always up-to-date REST API documentation
+* Non-desctructive database design
+* Password-based user authentication. Supported algorithm: argon2
 * SMS delivery service integrations (for delivering the OTPs): Vonage (Nexmo),
   Telesign, Twilio
 * Email delivery service integrations (for delivering the OTPs): Amazon SES
