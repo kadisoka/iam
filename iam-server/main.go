@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/kadisoka/foundation/pkg/app"
 	"github.com/kadisoka/foundation/pkg/webui"
@@ -32,6 +33,17 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("Servers initialization")
 	}
+
+	// to detect that all services are ready
+	go func() {
+		for {
+			time.Sleep(200 * time.Millisecond)
+			if srvApp.IsAllServersAcceptingClients() {
+				log.Info().Msg("Services are ready")
+				break
+			}
+		}
+	}()
 
 	srvApp.Run()
 }

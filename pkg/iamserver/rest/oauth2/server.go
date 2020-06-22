@@ -24,7 +24,7 @@ var (
 func NewServer(
 	basePath string,
 	iamServerCore *iamserver.Core,
-	loginURL string,
+	signInURL string,
 ) (*Server, error) {
 	if !iamServerCore.JWTKeyChain().CanSign() {
 		return nil, apperrs.NewConfigurationMsg("JWT key chain is required")
@@ -32,7 +32,7 @@ func NewServer(
 	return &Server{
 		iamserver.RESTServiceServerWith(iamServerCore),
 		basePath,
-		loginURL,
+		signInURL,
 	}, nil
 }
 
@@ -40,7 +40,7 @@ func NewServer(
 type Server struct {
 	serverCore *iamserver.RESTServiceServerBase
 	basePath   string
-	loginURL   string
+	signInURL  string
 }
 
 func (restSrv *Server) jwtKeyChain() *iam.JWTKeyChain {

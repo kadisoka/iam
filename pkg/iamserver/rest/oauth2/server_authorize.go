@@ -116,16 +116,23 @@ func (restSrv *Server) getAuthorize(req *restful.Request, resp *restful.Response
 	// - check the scopes
 	// - ensure that the client is allowed to use this flow
 
-	targetURL := restSrv.loginURL + "?" + inQuery.Encode()
+	targetURL := restSrv.signInURL + "?" + inQuery.Encode()
 	http.Redirect(w, r, targetURL, http.StatusFound)
 	return
 }
 
 func (restSrv *Server) postAuthorize(req *restful.Request, resp *restful.Response) {
 	reqCtx, err := restSrv.RESTRequestContext(req.Request)
-	if !reqCtx.IsUserContext() {
+	if err != nil {
 		logCtx(reqCtx).
-			Warn().Err(err).Msg("Unauthorized")
+			Warn().Err(err).Msg("Request context")
+		rest.RespondTo(resp).EmptyError(
+			http.StatusUnauthorized)
+		return
+	}
+	if reqCtx.Authorization().IsValid() {
+		logCtx(reqCtx).
+			Warn().Msg("Request context must not contain any valid authorization")
 		rest.RespondTo(resp).EmptyError(
 			http.StatusUnauthorized)
 		return

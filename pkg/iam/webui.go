@@ -1,5 +1,5 @@
 package iam
 
 type WebUIURLs struct {
-	Login string `env:"LOGIN"`
+	SignIn string `env:"SIGNIN"`
 }

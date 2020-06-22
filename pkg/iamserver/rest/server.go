@@ -93,7 +93,7 @@ func NewServer(
 	iamServerCore *iamserver.Core,
 	webUIURLs *iam.WebUIURLs, //TODO: add this to server core
 ) (*Server, error) {
-	if webUIURLs == nil || webUIURLs.Login == "" {
+	if webUIURLs == nil || webUIURLs.SignIn == "" {
 		return nil, errors.Msg("requires valid web UI config")
 	}
 
@@ -122,7 +122,7 @@ func NewServer(
 	if v1ServePath == "" {
 		v1ServePath = servePath + "/v1"
 	}
-	initRESTV1Services(v1ServePath, container, iamServerCore, webUIURLs.Login)
+	initRESTV1Services(v1ServePath, container, iamServerCore, webUIURLs.SignIn)
 
 	secDefs := spec.SecurityDefinitions{
 		"basic-oauth2-client-creds": spec.BasicAuth(),
@@ -166,7 +166,7 @@ func initRESTV1Services(
 	servePath string,
 	container *restful.Container,
 	iamServerCore *iamserver.Core,
-	loginURL string,
+	signInURL string,
 ) {
 	log.Info().Msg("Initializing terminal service...")
 	terminalSrv := terminal.NewServer(servePath+"/terminals", iamServerCore)
@@ -177,7 +177,7 @@ func initRESTV1Services(
 	container.Add(userSrv.RestfulWebService())
 
 	log.Info().Msg("Initializing OAuth 2.0 service...")
-	oauth2Srv, err := oauth2.NewServer(servePath+"/oauth2", iamServerCore, loginURL)
+	oauth2Srv, err := oauth2.NewServer(servePath+"/oauth2", iamServerCore, signInURL)
 	if err != nil {
 		log.Fatal().Err(err).Msg("OAuth 2.0 service initialization")
 	}

@@ -15,7 +15,7 @@ func (restSrv *Server) handleTokenRequestByPasswordGrant(
 	req *restful.Request, resp *restful.Response,
 ) {
 	reqClient, err := restSrv.serverCore.
-		AuthenticateClientAuthorization(req.Request)
+		RequestClient(req.Request)
 	if err != nil {
 		logReq(req.Request).
 			Warn().Err(err).Msg("Client authentication")

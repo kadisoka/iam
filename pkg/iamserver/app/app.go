@@ -158,8 +158,8 @@ func resolveConfig(cfg *Config) {
 	if cfg.WebUI.Server.FilesDir == "" {
 		cfg.WebUI.Server.FilesDir = "resources/iam-webui"
 	}
-	if cfg.WebUI.URLs.Login == "" {
-		cfg.WebUI.URLs.Login = cfg.WebUI.Server.ServePath + "signin"
+	if cfg.WebUI.URLs.SignIn == "" {
+		cfg.WebUI.URLs.SignIn = cfg.WebUI.Server.ServePath + "signin"
 	}
 
 	if cfg.REST == nil {

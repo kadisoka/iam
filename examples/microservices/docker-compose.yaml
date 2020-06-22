@@ -42,6 +42,7 @@ services:
       - $PWD/iam-server/etc/secrets/config.env
     environment:
       - IAM_GRPC_ENABLED=true
+      - IAM_REST_CANONICAL_BASE_URL=http://localhost:11121/rest/v1/
       - LOG_LEVEL=debug
       - LOG_PRETTY=true
 
@@ -55,7 +56,7 @@ services:
     ports:
       - 11201:8080
     environment:
-      - IAM_SERVER_BASE_URL=http://iam-server:9080/rest/v1
       - IAM_CLIENT_ID=CCU0T1gp34z
       - IAM_CLIENT_SECRET=dgKO1k53NnHAoWHEZecc5w
       - LOG_PRETTY=true
+      - IAM_SERVER_BASE_URL=http://iam-server:9080/rest/v1

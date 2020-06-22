@@ -24,7 +24,7 @@ var (
 
 // Authorization is generally used to provide authorization information
 // for call or request. An Authorization is usually obtained from authorization
-// token / access token.
+// token / access token provided along the request / call.
 type Authorization struct {
 	// If this context is an assumed context, this field
 	// holds info about the assuming context.
@@ -50,18 +50,15 @@ func newEmptyAuthorization() *Authorization {
 	return &Authorization{}
 }
 
-func (authCtx *Authorization) IsValid() bool {
-	return authCtx != nil && authCtx.AuthorizationID.IsValid()
+func (authCtx Authorization) IsValid() bool {
+	return authCtx.AuthorizationID.IsValid()
 }
 
-func (authCtx *Authorization) IsNotValid() bool {
+func (authCtx Authorization) IsNotValid() bool {
 	return !authCtx.IsValid()
 }
 
-func (authCtx *Authorization) Actor() Actor {
-	if authCtx == nil {
-		return Actor{}
-	}
+func (authCtx Authorization) Actor() Actor {
 	return Actor{
 		UserID:     authCtx.UserID,
 		TerminalID: authCtx.AuthorizationID.TerminalID,
@@ -69,15 +66,15 @@ func (authCtx *Authorization) Actor() Actor {
 }
 
 // IsUserContext is used to determine if this context represents a user.
-func (authCtx *Authorization) IsUserContext() bool {
-	if authCtx != nil && authCtx.ClientID().IsUserAgent() && authCtx.UserID.IsValid() {
+func (authCtx Authorization) IsUserContext() bool {
+	if authCtx.ClientID().IsUserAgent() && authCtx.UserID.IsValid() {
 		return true
 	}
 	return false
 }
 
-func (authCtx *Authorization) IsServiceClientContext() bool {
-	if authCtx != nil && authCtx.ClientID().IsService() && authCtx.UserID.IsNotValid() {
+func (authCtx Authorization) IsServiceClientContext() bool {
+	if authCtx.ClientID().IsService() && authCtx.UserID.IsNotValid() {
 		return true
 	}
 	return false
@@ -85,45 +82,34 @@ func (authCtx *Authorization) IsServiceClientContext() bool {
 
 // UserIDPtr returns a pointer to a new copy of user ID. The
 // returned value is non-nil when the user ID is valid.
-func (authCtx *Authorization) UserIDPtr() *UserID {
-	if authCtx != nil && authCtx.UserID.IsValid() {
-		v := authCtx.UserID
-		return &v
+func (authCtx Authorization) UserIDPtr() *UserID {
+	if authCtx.UserID.IsValid() {
+		return &authCtx.UserID
 	}
 	return nil
 }
 
-func (authCtx *Authorization) TerminalID() TerminalID {
-	if authCtx != nil {
-		return authCtx.AuthorizationID.TerminalID
-	}
-	return 0
+func (authCtx Authorization) TerminalID() TerminalID {
+	return authCtx.AuthorizationID.TerminalID
 }
 
 // TerminalIDPtr returns a pointer to a new copy of terminal ID. The
 // returned value is non-nil when the terminal ID is valid.
-func (authCtx *Authorization) TerminalIDPtr() *TerminalID {
-	if authCtx != nil && authCtx.AuthorizationID.TerminalID.IsValid() {
-		v := authCtx.AuthorizationID.TerminalID
-		return &v
+func (authCtx Authorization) TerminalIDPtr() *TerminalID {
+	if authCtx.AuthorizationID.TerminalID.IsValid() {
+		return &authCtx.AuthorizationID.TerminalID
 	}
 	return nil
 }
 
-func (authCtx *Authorization) ClientID() ClientID {
-	if authCtx != nil {
-		return authCtx.AuthorizationID.ClientID()
-	}
-	return 0
+func (authCtx Authorization) ClientID() ClientID {
+	return authCtx.AuthorizationID.ClientID()
 }
 
 // RawToken returns the token where this instance of Authorization
 // was parsed from.
-func (authCtx *Authorization) RawToken() string {
-	if authCtx != nil {
-		return authCtx.rawToken
-	}
-	return ""
+func (authCtx Authorization) RawToken() string {
+	return authCtx.rawToken
 }
 
 const (
