@@ -61,7 +61,9 @@ docker-compose -f examples/monolith/docker-compose.yaml up --build
 Wait until it started and then open up `http://localhost:8080/` in a web
 browser.
 
-#### Microservices
+#### Microservices example
+
+TBD
 
 ## Use cases
 
