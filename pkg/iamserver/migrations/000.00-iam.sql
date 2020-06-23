@@ -174,11 +174,11 @@ CREATE TABLE user_email_addresses (
 CREATE UNIQUE INDEX user_email_addresses_pidx
     ON user_email_addresses (user_id, local_part, domain_part)
     WHERE deletion_time IS NULL;
--- To ensure that each user has only one primary
+-- Each user has only one primary
 CREATE UNIQUE INDEX user_email_addresses_user_id_uidx
     ON user_email_addresses (user_id)
     WHERE deletion_time IS NULL AND verification_time IS NOT NULL AND is_primary IS TRUE;
--- To ensure that a email address is active as primary
+-- One instance of active primary for each email address
 CREATE UNIQUE INDEX user_email_addresses_local_part_domain_part_uidx
     ON user_email_addresses (local_part, domain_part)
     WHERE deletion_time IS NULL AND verification_time IS NOT NULL AND is_primary IS TRUE;

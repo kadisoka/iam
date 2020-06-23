@@ -60,8 +60,7 @@ func (core *Core) StartTerminalAuthorizationByPhoneNumber(
 		return iam.TerminalIDZero, 0, nil, errors.Arg("phoneNumber", nil)
 	}
 
-	//TODO: if the number is not already associated to a user, keep using the same
-	// user id if we got another request with the same phone number.
+	// Get the existing owner, whether already verified or not.
 	existingOwnerUserID, _, err := core.
 		getUserIDByPrimaryPhoneNumberAllowUnverified(phoneNumber)
 	if err != nil {
@@ -141,15 +140,17 @@ func (core *Core) StartTerminalAuthorizationByEmailAddress(
 	verificationMethods []eav10n.VerificationMethod,
 ) (terminalID iam.TerminalID, verificationID int64, codeExpiry *time.Time, err error) {
 	authCtx := callCtx.Authorization()
+	if authCtx.IsValid() && !authCtx.IsUserContext() {
+		return iam.TerminalIDZero, 0, nil, iam.ErrAuthorizationInvalid
+	}
 
 	if !emailAddress.IsValid() && !core.IsTestEmailAddress(emailAddress) {
 		return iam.TerminalIDZero, 0, nil, errors.Arg("emailAddress", nil)
 	}
 
-	//TODO: if the address is not already associated to a user, keep using the same
-	// user id if we got another request with the same email address.
-	existingOwnerUserID, err := core.
-		GetUserIDByPrimaryEmailAddress(emailAddress)
+	// Get the existing owner, whether already verified or not.
+	existingOwnerUserID, _, err := core.
+		getUserIDByPrimaryEmailAddressAllowUnverified(emailAddress)
 	if err != nil {
 		panic(err)
 	}
@@ -177,7 +178,7 @@ func (core *Core) StartTerminalAuthorizationByEmailAddress(
 
 	tNow := time.Now().UTC()
 
-	userID := existingOwnerUserID
+	ownerUserID := existingOwnerUserID
 	verificationID, codeExpiry, err = core.eaVerifier.
 		StartVerification(callCtx, emailAddress,
 			0, userPreferredLanguages, verificationMethods)
@@ -199,7 +200,7 @@ func (core *Core) StartTerminalAuthorizationByEmailAddress(
 
 	terminalID, _, err = core.RegisterTerminal(TerminalRegistrationInput{
 		ClientID:           clientID,
-		UserID:             userID,
+		UserID:             ownerUserID,
 		DisplayName:        displayName,
 		AcceptLanguage:     strings.Join(termLangStrings, ","),
 		CreationTime:       tNow,
@@ -278,7 +279,7 @@ func (core *Core) ConfirmTerminalAuthorization(
 			if !updated {
 				// Let's check if the email address is associated to other user
 				existingOwnerUserID, err := core.
-					GetUserIDByPrimaryEmailAddress(*emailAddress)
+					getUserIDByPrimaryEmailAddress(*emailAddress)
 				if err != nil {
 					panic(err)
 				}

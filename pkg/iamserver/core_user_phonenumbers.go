@@ -106,7 +106,7 @@ func (core *Core) GetUserPrimaryPhoneNumber(
 	return &phoneNumber, nil
 }
 
-// The ID of the user which provided phone number is their primary.
+// The ID of the user which provided phone number is their verified primary.
 func (core *Core) getUserIDByPrimaryPhoneNumber(
 	phoneNumber iam.PhoneNumber,
 ) (ownerUserID iam.UserID, err error) {
@@ -131,7 +131,8 @@ func (core *Core) getUserIDByPrimaryPhoneNumber(
 	return
 }
 
-// The ID of the user which provided phone number is their primary.
+// The ID of the user which provided phone number is their primary,
+// verified or not.
 func (core *Core) getUserIDByPrimaryPhoneNumberAllowUnverified(
 	phoneNumber iam.PhoneNumber,
 ) (ownerUserID iam.UserID, verified bool, err error) {

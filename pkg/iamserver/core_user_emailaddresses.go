@@ -56,29 +56,55 @@ func (core *Core) GetUserPrimaryEmailAddress(
 	return &emailAddress, nil
 }
 
-// The ID of the user which provided email address is their primary.
-func (core *Core) GetUserIDByPrimaryEmailAddress(
+// The ID of the user which provided email address is their verified primary.
+func (core *Core) getUserIDByPrimaryEmailAddress(
 	emailAddress iam.EmailAddress,
-) (iam.UserID, error) {
-	var err error
-	var ownerUserID iam.UserID
-
+) (ownerUserID iam.UserID, err error) {
+	queryStr :=
+		`SELECT user_id ` +
+			`FROM user_email_addresses ` +
+			`WHERE local_part = $1 AND domain_part = $2 ` +
+			`AND is_primary IS TRUE AND deletion_time IS NULL ` +
+			`AND verification_time IS NOT NULL`
 	err = core.db.
-		QueryRowx(
-			`SELECT user_id `+
-				`FROM user_email_addresses `+
-				`WHERE local_part = $1 AND domain_part = $2 `+
-				`AND is_primary IS TRUE AND deletion_time IS NULL AND verification_time IS NOT NULL`,
-			emailAddress.LocalPart(), emailAddress.DomainPart()).
+		QueryRow(queryStr,
+			emailAddress.LocalPart(),
+			emailAddress.DomainPart()).
 		Scan(&ownerUserID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return ownerUserID, nil
+			return iam.UserIDZero, nil
 		}
-		return ownerUserID, err
+		return iam.UserIDZero, err
 	}
 
-	return ownerUserID, nil
+	return
+}
+
+// The ID of the user which provided email address is their primary,
+// verified or not.
+func (core *Core) getUserIDByPrimaryEmailAddressAllowUnverified(
+	emailAddress iam.EmailAddress,
+) (ownerUserID iam.UserID, verified bool, err error) {
+	queryStr :=
+		`SELECT user_id, CASE WHEN verification_time IS NULL THEN false ELSE true END AS verified ` +
+			`FROM user_email_addresses ` +
+			`WHERE local_part = $1 AND domain_part = $2 ` +
+			`AND is_primary IS TRUE AND deletion_time IS NULL ` +
+			`ORDER BY creation_time DESC LIMIT 1`
+	err = core.db.
+		QueryRow(queryStr,
+			emailAddress.LocalPart(),
+			emailAddress.DomainPart()).
+		Scan(&ownerUserID, &verified)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return iam.UserIDZero, false, nil
+		}
+		return iam.UserIDZero, false, err
+	}
+
+	return
 }
 
 func (core *Core) SetUserPrimaryEmailAddress(
@@ -97,9 +123,9 @@ func (core *Core) SetUserPrimaryEmailAddress(
 	}
 
 	existingOwnerUserID, err := core.
-		GetUserIDByPrimaryEmailAddress(emailAddress)
+		getUserIDByPrimaryEmailAddress(emailAddress)
 	if err != nil {
-		return 0, nil, errors.Wrap("GetUserIDByPrimaryEmailAddress", err)
+		return 0, nil, errors.Wrap("getUserIDByPrimaryEmailAddress", err)
 	}
 	if existingOwnerUserID.IsValid() {
 		if existingOwnerUserID != authCtx.UserID {
