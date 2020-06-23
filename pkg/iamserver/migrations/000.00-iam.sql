@@ -35,11 +35,11 @@ CREATE TABLE user_phone_numbers (
 CREATE UNIQUE INDEX user_phone_numbers_pidx
     ON user_phone_numbers (user_id, country_code, national_number)
     WHERE deletion_time IS NULL;
--- To ensure that each user has only one primary
+-- Each user has only one primary
 CREATE UNIQUE INDEX user_phone_numbers_user_id_uidx
     ON user_phone_numbers (user_id)
     WHERE deletion_time IS NULL AND verification_time IS NOT NULL AND is_primary IS TRUE;
--- To ensure that a phone number is active as primary
+-- One instance of active primary for each phone number
 CREATE UNIQUE INDEX user_phone_numbers_country_code_national_number_uidx
     ON user_phone_numbers (country_code, national_number)
     WHERE deletion_time IS NULL AND verification_time IS NOT NULL AND is_primary IS TRUE;

@@ -390,7 +390,7 @@ func (core *Core) IsUserProfileImageURLAllowed(profileImageURL string) bool {
 		strings.HasPrefix(profileImageURL, "https://")
 }
 
-func (core *Core) EnsureOrNewUserID(
+func (core *Core) ensureOrNewUserID(
 	callCtx iam.CallContext,
 	userID iam.UserID,
 ) (iam.UserID, error) {

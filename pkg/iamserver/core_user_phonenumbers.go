@@ -107,28 +107,53 @@ func (core *Core) GetUserPrimaryPhoneNumber(
 }
 
 // The ID of the user which provided phone number is their primary.
-func (core *Core) GetUserIDByPrimaryPhoneNumber(
+func (core *Core) getUserIDByPrimaryPhoneNumber(
 	phoneNumber iam.PhoneNumber,
-) (iam.UserID, error) {
-	var err error
-	var ownerUserID iam.UserID
-
+) (ownerUserID iam.UserID, err error) {
+	queryStr :=
+		`SELECT user_id ` +
+			`FROM user_phone_numbers ` +
+			`WHERE country_code = $1 AND national_number = $2 ` +
+			`AND is_primary IS TRUE AND deletion_time IS NULL ` +
+			`AND verification_time IS NOT NULL`
 	err = core.db.
-		QueryRowx(
-			`SELECT user_id `+
-				`FROM user_phone_numbers `+
-				`WHERE country_code = $1 AND national_number = $2 `+
-				`AND is_primary IS TRUE AND deletion_time IS NULL AND verification_time IS NOT NULL`,
-			phoneNumber.CountryCode(), phoneNumber.NationalNumber()).
+		QueryRow(queryStr,
+			phoneNumber.CountryCode(),
+			phoneNumber.NationalNumber()).
 		Scan(&ownerUserID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return ownerUserID, nil
+			return iam.UserIDZero, nil
 		}
-		return ownerUserID, err
+		return iam.UserIDZero, err
 	}
 
-	return ownerUserID, nil
+	return
+}
+
+// The ID of the user which provided phone number is their primary.
+func (core *Core) getUserIDByPrimaryPhoneNumberAllowUnverified(
+	phoneNumber iam.PhoneNumber,
+) (ownerUserID iam.UserID, verified bool, err error) {
+	queryStr :=
+		`SELECT user_id, CASE WHEN verification_time IS NULL THEN false ELSE true END AS verified ` +
+			`FROM user_phone_numbers ` +
+			`WHERE country_code = $1 AND national_number = $2 ` +
+			`AND is_primary IS TRUE AND deletion_time IS NULL ` +
+			`ORDER BY creation_time DESC LIMIT 1`
+	err = core.db.
+		QueryRow(queryStr,
+			phoneNumber.CountryCode(),
+			phoneNumber.NationalNumber()).
+		Scan(&ownerUserID, &verified)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return iam.UserIDZero, false, nil
+		}
+		return iam.UserIDZero, false, err
+	}
+
+	return
 }
 
 func (core *Core) SetUserPrimaryPhoneNumber(
@@ -146,10 +171,12 @@ func (core *Core) SetUserPrimaryPhoneNumber(
 		return 0, nil, iam.ErrContextUserNotAllowedToPerformActionOnResource
 	}
 
+	//TODO: prone to race condition. solution: simply call
+	// setUserPrimaryPhoneNumber and translate the error.
 	existingOwnerUserID, err := core.
-		GetUserIDByPrimaryPhoneNumber(phoneNumber)
+		getUserIDByPrimaryPhoneNumber(phoneNumber)
 	if err != nil {
-		return 0, nil, errors.Wrap("GetUserIDByPrimaryPhoneNumber", err)
+		return 0, nil, errors.Wrap("getUserIDByPrimaryPhoneNumber", err)
 	}
 	if existingOwnerUserID.IsValid() {
 		if existingOwnerUserID != authCtx.UserID {

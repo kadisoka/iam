@@ -52,6 +52,9 @@ func (core *Core) StartTerminalAuthorizationByPhoneNumber(
 	verificationMethods []pnv10n.VerificationMethod,
 ) (terminalID iam.TerminalID, verificationID int64, codeExpiry *time.Time, err error) {
 	authCtx := callCtx.Authorization()
+	if authCtx.IsValid() && !authCtx.IsUserContext() {
+		return iam.TerminalIDZero, 0, nil, iam.ErrAuthorizationInvalid
+	}
 
 	if !phoneNumber.IsValid() && !core.IsTestPhoneNumber(phoneNumber) {
 		return iam.TerminalIDZero, 0, nil, errors.Arg("phoneNumber", nil)
@@ -59,8 +62,8 @@ func (core *Core) StartTerminalAuthorizationByPhoneNumber(
 
 	//TODO: if the number is not already associated to a user, keep using the same
 	// user id if we got another request with the same phone number.
-	existingOwnerUserID, err := core.
-		GetUserIDByPrimaryPhoneNumber(phoneNumber)
+	existingOwnerUserID, _, err := core.
+		getUserIDByPrimaryPhoneNumberAllowUnverified(phoneNumber)
 	if err != nil {
 		panic(err)
 	}
@@ -73,7 +76,7 @@ func (core *Core) StartTerminalAuthorizationByPhoneNumber(
 		}
 	} else {
 		newUserID, err := core.
-			EnsureOrNewUserID(callCtx, authCtx.UserID)
+			ensureOrNewUserID(callCtx, authCtx.UserID)
 		if err != nil {
 			panic(err)
 		}
@@ -88,7 +91,7 @@ func (core *Core) StartTerminalAuthorizationByPhoneNumber(
 
 	tNow := time.Now().UTC()
 
-	userID := existingOwnerUserID
+	ownerUserID := existingOwnerUserID
 	verificationID, codeExpiry, err = core.pnVerifier.
 		StartVerification(callCtx, phoneNumber,
 			0, userPreferredLanguages, verificationMethods)
@@ -110,7 +113,7 @@ func (core *Core) StartTerminalAuthorizationByPhoneNumber(
 
 	terminalID, _, err = core.RegisterTerminal(TerminalRegistrationInput{
 		ClientID:           clientID,
-		UserID:             userID,
+		UserID:             ownerUserID,
 		DisplayName:        displayName,
 		AcceptLanguage:     strings.Join(termLangStrings, ","),
 		CreationTime:       tNow,
@@ -159,7 +162,7 @@ func (core *Core) StartTerminalAuthorizationByEmailAddress(
 		}
 	} else {
 		newUserID, err := core.
-			EnsureOrNewUserID(callCtx, authCtx.UserID)
+			ensureOrNewUserID(callCtx, authCtx.UserID)
 		if err != nil {
 			panic(err)
 		}
@@ -321,7 +324,7 @@ func (core *Core) ConfirmTerminalAuthorization(
 			if !updated {
 				// Let's check if the phone number is associated to other user
 				existingOwnerUserID, err := core.
-					GetUserIDByPrimaryPhoneNumber(*phoneNumber)
+					getUserIDByPrimaryPhoneNumber(*phoneNumber)
 				if err != nil {
 					panic(err)
 				}

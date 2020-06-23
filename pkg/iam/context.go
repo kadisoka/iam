@@ -9,6 +9,7 @@ import (
 
 var (
 	ErrAuthorizationRequired = accesserrs.Msg("authorization context required")
+	ErrAuthorizationInvalid  = accesserrs.Msg("authorization invalid")
 
 	ErrUserContextRequired          = accesserrs.Msg("user context required")
 	ErrServiceClientContextRequired = accesserrs.Msg("service client context required")
