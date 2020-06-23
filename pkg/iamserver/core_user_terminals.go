@@ -19,10 +19,11 @@ func (core *Core) DeleteUserTerminalFCMRegistrationToken(
 	return err
 }
 
-//TODO: use cache service
 func (core *Core) ListUserTerminalIDFirebaseInstanceTokens(
 	ownerUserID iam.UserID,
 ) ([]iam.TerminalIDFirebaseInstanceToken, error) {
+	//TODO: use cache service
+
 	userTermRows, err := core.db.Query(
 		"SELECT tid.id, tid.platform_type, tft.token FROM terminals tid "+
 			"JOIN user_terminal_fcm_registration_tokens tft "+

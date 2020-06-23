@@ -18,9 +18,9 @@ const (
 	TerminalVerificationResourceTypePhoneNumber  = "phone-number"
 	TerminalVerificationResourceTypeEmailAddress = "email-address"
 
-	TerminalVerificationResourceTypeOAuthAuthorizationCode = "oauth-authorization-code"
-	TerminalVerificationResourceTypeOAuthImplicit          = "oauth-implicit"
-	TerminalVerificationResourceTypeOAuthClientCredentials = "oauth-client-credentials"
+	TerminalVerificationResourceTypeOAuthAuthorizationCode = "oauth2-authorization-code"
+	TerminalVerificationResourceTypeOAuthImplicit          = "oauth2-implicit"
+	TerminalVerificationResourceTypeOAuthClientCredentials = "oauth2-client-credentials"
 )
 
 var (

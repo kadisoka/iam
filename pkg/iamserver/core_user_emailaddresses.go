@@ -11,25 +11,8 @@ import (
 	"github.com/kadisoka/iam/pkg/iamserver/eav10n"
 )
 
-//TODO: make this private
-type UserEmailAddress struct {
-	UserID             iam.UserID     `db:"user_id"`
-	Local              string         `db:"local_part"`
-	Domain             string         `db:"domain_part"`
-	RawInput           string         `db:"raw_input"`
-	IsPrimary          bool           `db:"is_primary"`
-	CreationTime       time.Time      `db:"creation_time"`
-	CreationUserID     iam.UserID     `db:"creation_user_id"`
-	CreationTerminalID iam.TerminalID `db:"creation_terminal_id"`
-	DeletionTime       *time.Time     `db:"deletion_time"`
-	DeletionUserID     *iam.UserID    `db:"deletion_user_id"`
-	DeletionTerminalID iam.TerminalID `db:"deletion_terminal_id"`
-	VerificationID     int64          `db:"verification_id"`
-	VerificationTime   *time.Time     `db:"verification_time"`
-}
-
 //TODO(exa): there should be getters for different purpose (e.g.,
-// for login, for display, for actual mailing, for recovery, etc)
+// for login / primary, for display / contact, for actual mailing, for recovery, etc)
 func (core *Core) GetUserPrimaryEmailAddress(
 	callCtx iam.CallContext,
 	userID iam.UserID,
@@ -247,34 +230,6 @@ func (core *Core) ConfirmUserEmailAddressVerification(
 	}
 
 	return updated, nil
-}
-
-//TODO(exa): this won't work well with internationalized domain names
-func (core *Core) GetUserEmailAddress(
-	emailAddress string,
-) (*UserEmailAddress, error) {
-	var err error
-	uea := UserEmailAddress{}
-	err = core.db.QueryRowx(
-		`SELECT `+
-			`user_id, local_part, domain_part, raw_input, is_primary, `+
-			`creation_time, creation_user_id, creation_terminal_id, `+
-			`deletion_time, deletion_user_id, deletion_terminal_id, `+
-			`verification_id, verification_time `+
-			`FROM user_email_addresses `+
-			`WHERE raw_input = $1 `+
-			`AND deletion_time IS NULL AND verification_time IS NOT NULL`,
-		emailAddress,
-	).StructScan(&uea)
-
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
-		}
-		return nil, err
-	}
-
-	return &uea, nil
 }
 
 func (core *Core) ensureUserEmailAddressVerifiedFlag(

@@ -383,8 +383,8 @@ func (core *Core) GetUserContactInformation(
 	}, nil
 }
 
-//TODO(exa): limit profile image url to certain hosts or keep only the filename
 func (core *Core) IsUserProfileImageURLAllowed(profileImageURL string) bool {
+	//TODO(exa): limit profile image url to certain hosts or keep only the filename
 	return profileImageURL == "" ||
 		strings.HasPrefix(profileImageURL, "http://") ||
 		strings.HasPrefix(profileImageURL, "https://")

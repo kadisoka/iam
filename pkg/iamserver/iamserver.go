@@ -1,3 +1,4 @@
+// Package iamserver is the implementation of iam domain logic.
 package iamserver
 
 import (

@@ -46,19 +46,19 @@ type JWTKeyChain struct {
 	rsaVerifierKeys map[string]*rsa.PublicKey
 }
 
-func (jwtKeyChain *JWTKeyChain) CanSign() bool {
+func (jwtKeyChain JWTKeyChain) CanSign() bool {
 	return jwtKeyChain.signer != nil && jwtKeyChain.signerKeyID != ""
 }
 
-func (jwtKeyChain *JWTKeyChain) GetSigner() (interface{}, string) {
+func (jwtKeyChain JWTKeyChain) GetSigner() (interface{}, string) {
 	return jwtKeyChain.signer, jwtKeyChain.signerKeyID
 }
 
-func (jwtKeyChain *JWTKeyChain) GetSignerKeyID() string {
+func (jwtKeyChain JWTKeyChain) GetSignerKeyID() string {
 	return jwtKeyChain.signerKeyID
 }
 
-func (jwtKeyChain *JWTKeyChain) GetJWTVerifierKey(keyID string) interface{} {
+func (jwtKeyChain JWTKeyChain) GetJWTVerifierKey(keyID string) interface{} {
 	if jwtKeyChain.signer != nil {
 		return jwtKeyChain.signer.Public()
 	}
@@ -84,7 +84,7 @@ func (jwtKeyChain *JWTKeyChain) LoadVerifierKeysFromJWKSetByURL(url string) (int
 	return len(publicKeys), nil
 }
 
-func (jwtKeyChain *JWTKeyChain) JWKSet() *jwk.Set {
+func (jwtKeyChain JWTKeyChain) JWKSet() *jwk.Set {
 	publicKeys := make(map[string]*rsa.PublicKey)
 	if signerKey, signerKeyID := jwtKeyChain.GetSigner(); signerKey != nil && signerKeyID != "" {
 		if rsaPrivateKey, ok := signerKey.(*rsa.PrivateKey); ok {

@@ -21,20 +21,9 @@ var (
 	ErrPasswordHashVersionIncompatible = errors.New("hash version incompatible")
 )
 
-var passwordHashParamsEncoding = base64.RawStdEncoding
+var argon2PasswordHashParamsEncoding = base64.RawStdEncoding
 
-type UserPassword struct {
-	UserID             iam.UserID      `db:"user_id"`
-	Password           string          `db:"password"`
-	CreationTime       time.Time       `db:"creation_time"`
-	CreationUserID     iam.UserID      `db:"creation_user_id"`
-	CreationTerminalID iam.TerminalID  `db:"creation_terminal_id"`
-	DeletionTime       *time.Time      `db:"deletion_time"`
-	DeletionUserID     *iam.UserID     `db:"deletion_user_id"`
-	DeletionTerminalID *iam.TerminalID `db:"deletion_terminal_id"`
-}
-
-type PasswordHashingParams struct {
+type argon2PasswordHashingParams struct {
 	Memory      uint32
 	Iterations  uint32
 	Parallelism uint8
@@ -42,8 +31,8 @@ type PasswordHashingParams struct {
 	KeyLength   uint32
 }
 
-//TODO: might want to make this configurable
-var passwordHashingParams = &PasswordHashingParams{
+//TODO:make this configurable
+var passwordHashingParams = argon2PasswordHashingParams{
 	Memory:      64 * 1024,
 	Iterations:  3,
 	Parallelism: 2,
@@ -123,8 +112,10 @@ func (core *Core) getUserHashedPassword(
 func (core *Core) hashPassword(
 	password string,
 ) (encodedHashedPassword string, err error) {
+	params := passwordHashingParams
+
 	// generate a chryptographically secure random salt
-	salt, err := core.generatePasswordSalt(passwordHashingParams.SaltLength)
+	salt, err := core.generatePasswordSalt(params.SaltLength)
 	if err != nil {
 		return "", err
 	}
@@ -132,21 +123,20 @@ func (core *Core) hashPassword(
 	hash := argon2.IDKey(
 		[]byte(password),
 		salt,
-		passwordHashingParams.Iterations,
-		passwordHashingParams.Memory,
-		passwordHashingParams.Parallelism,
-		passwordHashingParams.KeyLength,
+		params.Iterations,
+		params.Memory,
+		params.Parallelism,
+		params.KeyLength,
 	)
 
 	// Base64 encode the salt and hashed password.
-	b64Salt := passwordHashParamsEncoding.EncodeToString(salt)
-	b64Hash := passwordHashParamsEncoding.EncodeToString(hash)
+	b64Salt := argon2PasswordHashParamsEncoding.EncodeToString(salt)
+	b64Hash := argon2PasswordHashParamsEncoding.EncodeToString(hash)
 
 	// Return string using the standard encoded hash representation.
 	encodedHashedPassword = fmt.Sprintf(
 		"$argon2id$v=%d$m=%d,t=%d,p=%d$%s$%s",
-		argon2.Version, passwordHashingParams.Memory,
-		passwordHashingParams.Iterations, passwordHashingParams.Parallelism,
+		argon2.Version, params.Memory, params.Iterations, params.Parallelism,
 		b64Salt, b64Hash)
 
 	return encodedHashedPassword, nil
@@ -170,14 +160,16 @@ func (core *Core) comparePasswordAndHashedPassword(
 	if encodedHashedPassword == "" {
 		return false, nil
 	}
-	p, salt, hash, err := core.decodePasswordHash(encodedHashedPassword)
+
+	params, salt, hash, err := core.
+		decodePasswordHash(encodedHashedPassword)
 	if err != nil {
 		return false, err
 	}
 
 	// Derive the key from the other password using the same parameters
 	otherHash := argon2.IDKey([]byte(password), salt,
-		p.Iterations, p.Memory, p.Parallelism, p.KeyLength)
+		params.Iterations, params.Memory, params.Parallelism, params.KeyLength)
 
 	if subtle.ConstantTimeCompare(hash, otherHash) == 1 {
 		return true, nil
@@ -188,7 +180,7 @@ func (core *Core) comparePasswordAndHashedPassword(
 
 func (core *Core) decodePasswordHash(
 	encodedHashedPassword string,
-) (p *PasswordHashingParams, salt, hash []byte, err error) {
+) (params *argon2PasswordHashingParams, salt, hash []byte, err error) {
 	vals := strings.Split(encodedHashedPassword, "$")
 
 	if len(vals) != 6 {
@@ -205,25 +197,27 @@ func (core *Core) decodePasswordHash(
 		return nil, nil, nil, ErrPasswordHashVersionIncompatible
 	}
 
-	p = &PasswordHashingParams{}
-	_, err = fmt.Sscanf(vals[3], "m=%d,t=%d,p=%d", &p.Memory, &p.Iterations, &p.Parallelism)
+	params = &argon2PasswordHashingParams{}
+	_, err = fmt.Sscanf(vals[3],
+		"m=%d,t=%d,p=%d",
+		&params.Memory, &params.Iterations, &params.Parallelism)
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	salt, err = passwordHashParamsEncoding.DecodeString(vals[4])
+	salt, err = argon2PasswordHashParamsEncoding.DecodeString(vals[4])
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	p.SaltLength = uint32(len(salt))
+	params.SaltLength = uint32(len(salt))
 
-	hash, err = passwordHashParamsEncoding.DecodeString(vals[5])
+	hash, err = argon2PasswordHashParamsEncoding.DecodeString(vals[5])
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	p.KeyLength = uint32(len(hash))
+	params.KeyLength = uint32(len(hash))
 
-	return p, salt, hash, nil
+	return params, salt, hash, nil
 }

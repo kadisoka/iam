@@ -59,7 +59,7 @@ func (restSrv *Server) RestfulWebService() *restful.WebService {
 		Consumes("application/x-www-form-urlencoded").
 		Produces(restful.MIME_JSON)
 
-	tags := []string{"iam.v1.oauth"}
+	tags := []string{"iam.v1.oauth2"}
 
 	restWS.Route(restWS.
 		GET("/authorize").
