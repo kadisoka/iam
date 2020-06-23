@@ -73,7 +73,7 @@ func NewCoreByConfig(coreCfg CoreConfig, appApp app.App) (*Core, error) {
 
 	// NOTE: We should store these data into a database instead of CSV file.
 	clientDataCSVFilename := filepath.Join(secretFilesDir, "clients.csv")
-	clientDataProvider, err := NewClientStaticDataProviderFromCSVFilename(
+	clientDataProvider, err := newClientStaticDataProviderFromCSVFileByName(
 		clientDataCSVFilename, 1)
 	if err != nil {
 		return nil, errors.Wrap("client data loading", err)
@@ -124,13 +124,13 @@ func NewCoreByConfig(coreCfg CoreConfig, appApp app.App) (*Core, error) {
 	return inst, nil
 }
 
-func (core *Core) IsTestPhoneNumber(phoneNumber iam.PhoneNumber) bool {
+func (core *Core) isTestPhoneNumber(phoneNumber iam.PhoneNumber) bool {
 	return phoneNumber.CountryCode() == 1 &&
 		phoneNumber.NationalNumber() > 5550000 &&
 		phoneNumber.NationalNumber() <= 5559999
 }
 
-func (core *Core) IsTestEmailAddress(emailAddress iam.EmailAddress) bool {
+func (core *Core) isTestEmailAddress(emailAddress iam.EmailAddress) bool {
 	return false
 }
 

@@ -56,7 +56,7 @@ func (core *Core) StartTerminalAuthorizationByPhoneNumber(
 		return iam.TerminalIDZero, 0, nil, iam.ErrAuthorizationInvalid
 	}
 
-	if !phoneNumber.IsValid() && !core.IsTestPhoneNumber(phoneNumber) {
+	if !phoneNumber.IsValid() && !core.isTestPhoneNumber(phoneNumber) {
 		return iam.TerminalIDZero, 0, nil, errors.Arg("phoneNumber", nil)
 	}
 
@@ -144,7 +144,7 @@ func (core *Core) StartTerminalAuthorizationByEmailAddress(
 		return iam.TerminalIDZero, 0, nil, iam.ErrAuthorizationInvalid
 	}
 
-	if !emailAddress.IsValid() && !core.IsTestEmailAddress(emailAddress) {
+	if !emailAddress.IsValid() && !core.isTestEmailAddress(emailAddress) {
 		return iam.TerminalIDZero, 0, nil, errors.Arg("emailAddress", nil)
 	}
 

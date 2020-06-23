@@ -13,11 +13,6 @@ type UserProfileService interface {
 		callCtx CallContext,
 		userID UserID,
 	) (*UserBaseProfile, error)
-	UpdateUserProfile(
-		callCtx CallContext,
-		userID UserID,
-		input UserProfileUpdateInput,
-	) (updated bool, err error)
 }
 
 type UserBaseProfile struct {
@@ -25,11 +20,6 @@ type UserBaseProfile struct {
 	DisplayName     string
 	ProfileImageURL string
 	IsDeleted       bool
-}
-
-type UserProfileUpdateInput struct {
-	DisplayName     *string
-	ProfileImageURL *string
 }
 
 // JSONV1 models

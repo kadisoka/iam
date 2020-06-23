@@ -210,77 +210,6 @@ func (core *Core) DeleteUserAccount(
 	return deleted, nil
 }
 
-func (core *Core) UpdateUserProfile(
-	callCtx iam.CallContext,
-	userID iam.UserID,
-	input iam.UserProfileUpdateInput,
-) (updated bool, err error) {
-	if callCtx == nil {
-		return false, nil
-	}
-	authCtx := callCtx.Authorization()
-	if !authCtx.IsUserContext() || authCtx.UserID != userID {
-		return false, nil
-	}
-
-	if input.ProfileImageURL != nil && *input.ProfileImageURL != "" && !core.IsUserProfileImageURLAllowed(*input.ProfileImageURL) {
-		return false, errors.ArgMsg("input.ProfileImageURL", "unsupported")
-	}
-
-	//TODO: detect changes
-	err = doTx(core.db, func(dbTx *sqlx.Tx) error {
-		if input.DisplayName != nil {
-			_, txErr := dbTx.Exec(
-				"UPDATE user_display_names "+
-					"SET deletion_time = now(), deletion_user_id = $1, deletion_terminal_id = $2 "+
-					"WHERE user_id = $1 AND deletion_time IS NULL",
-				authCtx.UserID, authCtx.TerminalID())
-			if txErr != nil {
-				return errors.Wrap("mark current display name as deleted", txErr)
-			}
-			displayName := strings.TrimSpace(*input.DisplayName)
-			if displayName != "" {
-				_, txErr = dbTx.Exec(
-					"INSERT INTO user_display_names "+
-						"(user_id, display_name, creation_user_id, creation_terminal_id) VALUES "+
-						"($1, $2, $3, $4)",
-					authCtx.UserID, displayName, authCtx.UserID, authCtx.TerminalID())
-				if txErr != nil {
-					return errors.Wrap("insert new display name", txErr)
-				}
-			}
-		}
-		if input.ProfileImageURL != nil {
-			_, txErr := dbTx.Exec(
-				"UPDATE user_profile_image_urls "+
-					"SET deletion_time = now(), deletion_user_id = $1, deletion_terminal_id = $2 "+
-					"WHERE user_id = $1 AND deletion_time IS NULL",
-				authCtx.UserID, authCtx.TerminalID())
-			if txErr != nil {
-				return errors.Wrap("mark current profile image URL as deleted", txErr)
-			}
-			if *input.ProfileImageURL != "" {
-				_, txErr = dbTx.Exec(
-					"INSERT INTO user_profile_image_urls "+
-						"(user_id, profile_image_url, creation_user_id, creation_terminal_id) VALUES "+
-						"($1, $2, $3, $4)",
-					authCtx.UserID, input.ProfileImageURL, authCtx.UserID, authCtx.TerminalID())
-				if txErr != nil {
-					return errors.Wrap("insert new profile image URL", txErr)
-				}
-			}
-		}
-		return nil
-	})
-	if err != nil {
-		return false, err
-	}
-
-	//TODO: update caches, emit events only if there's any changes
-
-	return updated, nil
-}
-
 func (core *Core) SetUserProfileImageURL(
 	callCtx iam.CallContext,
 	userID iam.UserID,
@@ -296,9 +225,11 @@ func (core *Core) SetUserProfileImageURL(
 	if authCtx.UserID != userID {
 		return iam.ErrContextUserNotAllowedToPerformActionOnResource
 	}
-	if profileImageURL != "" && !core.IsUserProfileImageURLAllowed(profileImageURL) {
+	if profileImageURL != "" && !core.isUserProfileImageURLAllowed(profileImageURL) {
 		return errors.ArgMsg("profileImageURL", "unsupported")
 	}
+
+	//TODO: on changes, update caches, emit events only if there's any changes
 
 	return doTx(core.db, func(dbTx *sqlx.Tx) error {
 		_, txErr := dbTx.Exec(
@@ -383,7 +314,7 @@ func (core *Core) GetUserContactInformation(
 	}, nil
 }
 
-func (core *Core) IsUserProfileImageURLAllowed(profileImageURL string) bool {
+func (core *Core) isUserProfileImageURLAllowed(profileImageURL string) bool {
 	//TODO(exa): limit profile image url to certain hosts or keep only the filename
 	return profileImageURL == "" ||
 		strings.HasPrefix(profileImageURL, "http://") ||

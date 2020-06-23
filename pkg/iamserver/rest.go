@@ -22,15 +22,18 @@ func RESTServiceServerWith(iamServerCore *Core) *RESTServiceServerBase {
 	return &RESTServiceServerBase{iamServerCore}
 }
 
-// Checks the header for Basic authorization.
+// RequestClient returns a Client info which identified by Basic authorization
+// header.
 //
-// - If the authorization is not provided, the returned client will be nil,
-//   and the err value will be nil.
-// - If the authorization is provided and it's invalid, the returned client
-//   will be nil and err value will contain the information about why it
-//   failed.
-// - If the authorization is provided and it's valid, the returned client
-//   will be a valid client and the err value will be nil.
+// If the authorization is not provided, the returned client will be nil,
+// and the err value will be nil.
+//
+// If the authorization is provided and it's invalid, the returned client
+// will be nil and err value will contain the information about why it
+// failed.
+//
+// If the authorization is provided and it's valid, the returned client
+// will be a valid client and err will be nil.
 func (svcBase *RESTServiceServerBase) RequestClient(
 	req *http.Request,
 ) (client *iam.Client, err error) {

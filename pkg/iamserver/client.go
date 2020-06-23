@@ -9,13 +9,13 @@ import (
 	"github.com/kadisoka/iam/pkg/iam"
 )
 
-type ClientStaticDataProvider struct {
+type clientStaticDataProvider struct {
 	clients map[iam.ClientID]*iam.Client
 }
 
-func NewClientStaticDataProviderFromCSVFilename(
+func newClientStaticDataProviderFromCSVFileByName(
 	filename string, skipRows int,
-) (*ClientStaticDataProvider, error) {
+) (*clientStaticDataProvider, error) {
 	csvFile, err := os.Open(filename)
 	if err != nil {
 		//TODO: translate errors
@@ -115,10 +115,10 @@ func NewClientStaticDataProviderFromCSVFilename(
 		}
 	}
 
-	return &ClientStaticDataProvider{clList}, nil
+	return &clientStaticDataProvider{clList}, nil
 }
 
-func (clientStaticDataStore *ClientStaticDataProvider) GetClient(
+func (clientStaticDataStore *clientStaticDataProvider) GetClient(
 	clientID iam.ClientID,
 ) (*iam.Client, error) {
 	cl := clientStaticDataStore.clients[clientID]

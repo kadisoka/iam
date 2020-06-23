@@ -13,14 +13,15 @@ func NewPkgLogger() Logger {
 	return Logger{PkgLogger: foundationlog.NewPkgLoggerInternal(foundationlog.CallerPkgName())}
 }
 
-// Logger wraps other logger to provide additional functionalities.
+// Logger is a specialized logger for logging with IAM-specific contexes.
 type Logger struct {
 	foundationlog.PkgLogger
 }
 
 // WithContext creates a new logger which bound to a CallContext.
 //
-//TODO: don't populate the entry before the actual logging call.
+// Call this method only at the logging points. It's not recommended to
+// keep the returned logger around.
 func (logger Logger) WithContext(
 	ctx iam.CallContext,
 ) *foundationlog.Logger {
