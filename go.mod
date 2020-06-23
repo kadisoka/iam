@@ -14,7 +14,7 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/jmoiron/sqlx v1.2.0
-	github.com/kadisoka/foundation v0.0.0-20200622201641-0bf21f5bf410
+	github.com/kadisoka/foundation v0.0.0-20200623154345-0128097ec7c1
 	github.com/lib/pq v1.7.0
 	github.com/mailru/easyjson v0.7.1 // indirect
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
@@ -24,7 +24,7 @@ require (
 	github.com/richardlehane/crock32 v1.0.1
 	github.com/stretchr/testify v1.6.1
 	github.com/tomasen/realip v0.0.0-20180522021738-f0c99a92ddce
-	golang.org/x/crypto v0.0.0-20200604202706-70a84ac30bf9
+	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/text v0.3.3
 	google.golang.org/grpc v1.30.0
 	gopkg.in/yaml.v2 v2.3.0 // indirect
