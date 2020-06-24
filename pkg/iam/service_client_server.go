@@ -53,8 +53,8 @@ func (svcClServer *ServiceClientServerCore) JWTKeyChain() *JWTKeyChain {
 }
 
 // Shortcut
-func (svcClServer *ServiceClientServerCore) GetJWTVerifierKey(keyID string) interface{} {
-	return svcClServer.jwtKeyChain.GetJWTVerifierKey(keyID)
+func (svcClServer *ServiceClientServerCore) GetSignedVerifierKey(keyID string) interface{} {
+	return svcClServer.jwtKeyChain.GetSignedVerifierKey(keyID)
 }
 
 func (svcClServer *ServiceClientServerCore) AuthorizationFromJWTString(
@@ -78,7 +78,7 @@ func (svcClServer *ServiceClientServerCore) AuthorizationFromJWTString(
 		return emptyAuthCtx, errors.Arg("", errors.EntMsg("kid", "empty"))
 	}
 
-	verifierKey := svcClServer.JWTKeyChain().GetJWTVerifierKey(keyID)
+	verifierKey := svcClServer.JWTKeyChain().GetSignedVerifierKey(keyID)
 	if verifierKey == nil {
 		return emptyAuthCtx, errors.Arg("", errors.EntMsg("kid", "reference invalid"))
 	}

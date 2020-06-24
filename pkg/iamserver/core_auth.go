@@ -7,7 +7,6 @@ import (
 	apperrs "github.com/kadisoka/foundation/pkg/app/errors"
 	"github.com/kadisoka/foundation/pkg/errors"
 	"github.com/lib/pq"
-	"github.com/square/go-jose/v3"
 	"github.com/square/go-jose/v3/jwt"
 
 	"github.com/kadisoka/iam/pkg/iam"
@@ -26,8 +25,11 @@ func (core *Core) GenerateAccessTokenJWT(
 	if jwtKeyChain == nil {
 		return "", apperrs.NewConfigurationMsg("JWT key chain is not configured")
 	}
-	signerKey, signerKeyID := jwtKeyChain.GetSigner()
-	if signerKey == nil || signerKeyID == "" {
+	signer, err := jwtKeyChain.GetSigner()
+	if err != nil {
+		return "", errors.Wrap("signer", err)
+	}
+	if signer == nil {
 		return "", apperrs.NewConfigurationMsg("JWT key chain does not have any signing key")
 	}
 
@@ -49,11 +51,6 @@ func (core *Core) GenerateAccessTokenJWT(
 		TerminalID:      terminalID.String(),
 	}
 
-	signer, err := jose.NewSigner(jose.SigningKey{
-		Algorithm: jose.RS256, Key: signerKey}, nil)
-	if err != nil {
-		return "", errors.Wrap("signer", err)
-	}
 	tokenString, err = jwt.Signed(signer).Claims(tokenClaims).CompactSerialize()
 	if err != nil {
 		return "", errors.Wrap("signing", err)
@@ -69,11 +66,17 @@ func (core *Core) GenerateRefreshTokenJWT(
 	if jwtKeyChain == nil {
 		return "", apperrs.NewConfigurationMsg("JWT key chain is not configured")
 	}
-	signerKey, signerKeyID := jwtKeyChain.GetSigner()
-	if signerKey == nil || signerKeyID == "" {
+	signer, err := jwtKeyChain.GetSigner()
+	if err != nil {
+		return "", errors.Wrap("signer", err)
+	}
+	if signer == nil {
 		return "", apperrs.NewConfigurationMsg("JWT key chain does not have any signing key")
 	}
 
+	//TODO: issue time should be from arg so both access token and refresh
+	// token would have the exact same issue time if they were issued at
+	// the same time.
 	issueTime := time.Now().UTC()
 
 	tokenClaims := &iam.RefreshTokenClaims{
@@ -83,11 +86,6 @@ func (core *Core) GenerateRefreshTokenJWT(
 		TerminalSecret: terminalSecret,
 	}
 
-	signer, err := jose.NewSigner(jose.SigningKey{
-		Algorithm: jose.RS256, Key: signerKey}, nil)
-	if err != nil {
-		return "", errors.Wrap("signer", err)
-	}
 	tokenString, err = jwt.Signed(signer).Claims(tokenClaims).CompactSerialize()
 	if err != nil {
 		return "", errors.Wrap("signing", err)
@@ -106,6 +104,7 @@ func (core *Core) generateAuthorizationID(
 	tNow := timeZero
 	var instanceID iam.AuthorizationInstanceID
 
+	//TODO: make this more random.
 	// Note:
 	// - 0xffffffffffffff00 - timestamp
 	// - 0x00000000000000ff - random

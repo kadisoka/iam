@@ -11,7 +11,6 @@ import (
 	"github.com/kadisoka/iam/pkg/iam"
 	"github.com/kadisoka/iam/pkg/iam/rest/logging"
 	"github.com/kadisoka/iam/pkg/iamserver"
-	"github.com/kadisoka/iam/pkg/jose/jwk"
 )
 
 var (
@@ -96,7 +95,7 @@ func (restSrv *Server) RestfulWebService() *restful.WebService {
 		Doc("JSON Web Key Set endpoint").
 		Notes("The JSON Web Key Set endpoint provides public keys needed "+
 			"to verify JWT (JSON Web Token) tokens issued by this service.").
-		Returns(http.StatusOK, "OK", jwk.Set{}))
+		Returns(http.StatusOK, "OK. See https://tools.ietf.org/html/rfc7517 for the data structure", nil))
 
 	restWS.Route(restWS.
 		POST("/token").

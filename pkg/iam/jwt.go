@@ -3,110 +3,168 @@ package iam
 import (
 	"crypto"
 	"crypto/rsa"
-	"crypto/sha1"
+	_ "crypto/sha256"
 	"crypto/x509"
-	"encoding/hex"
+	"encoding/base64"
+	"encoding/json"
 	"encoding/pem"
 	"errors"
+	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"path/filepath"
 
-	"github.com/kadisoka/iam/pkg/jose/jwk"
+	"github.com/square/go-jose/v3"
 )
+
+var thumbprintHasher = crypto.SHA256
 
 func NewJWTKeyChainFromFiles(
 	privateKeyFilename string,
 	publicKeyFilenamePattern string,
 ) (*JWTKeyChain, error) {
 	//TODO: don't assume RSA
-	signer, err := loadRSAPrivateKeyFromPEMFile(privateKeyFilename, "")
+	signerKey, err := loadRSAPrivateKeyFromPEMFile(privateKeyFilename, "")
 	if err != nil {
 		return nil, err
 	}
 	var signerKeyID string
-	if signer != nil {
-		signerKeyID = fingerprintRSAPrivateKey(signer)
-	}
-
-	var rsaVerifierKeys map[string]*rsa.PublicKey
-	if publicKeyFilenamePattern != "" {
-		rsaVerifierKeys, err = loadRSAPublicKeysByFileNamePattern(publicKeyFilenamePattern)
+	if signerKey != nil {
+		signerKeyID, err = thumbprintKey(signerKey)
 		if err != nil {
-			return nil, err
+			panic(err)
 		}
 	}
 
-	return &JWTKeyChain{signer: signer, signerKeyID: signerKeyID, rsaVerifierKeys: rsaVerifierKeys}, nil
+	keySet := make(map[string]interface{})
+	if publicKeyFilenamePattern != "" {
+		rsaVerifierKeys, err := loadRSAPublicKeysByFileNamePattern(publicKeyFilenamePattern)
+		if err != nil {
+			return nil, err
+		}
+		for k, v := range rsaVerifierKeys {
+			keySet[k] = v
+		}
+	}
+
+	return &JWTKeyChain{signerKey: signerKey, signerKeyID: signerKeyID, keySet: keySet}, nil
 }
 
 type JWTKeyChain struct {
-	signer          crypto.Signer
-	signerKeyID     string
-	rsaVerifierKeys map[string]*rsa.PublicKey
+	signerKey   crypto.Signer
+	signerKeyID string
+	keySet      map[string]interface{}
 }
 
 func (jwtKeyChain JWTKeyChain) CanSign() bool {
-	return jwtKeyChain.signer != nil && jwtKeyChain.signerKeyID != ""
+	return jwtKeyChain.signerKey != nil && jwtKeyChain.signerKeyID != ""
 }
 
-func (jwtKeyChain JWTKeyChain) GetSigner() (interface{}, string) {
-	return jwtKeyChain.signer, jwtKeyChain.signerKeyID
-}
-
-func (jwtKeyChain JWTKeyChain) GetSignerKeyID() string {
-	return jwtKeyChain.signerKeyID
-}
-
-func (jwtKeyChain JWTKeyChain) GetJWTVerifierKey(keyID string) interface{} {
-	if jwtKeyChain.signer != nil {
-		return jwtKeyChain.signer.Public()
+func (jwtKeyChain JWTKeyChain) GetSigner() (jose.Signer, error) {
+	if !jwtKeyChain.CanSign() {
+		return nil, nil
 	}
-	if len(jwtKeyChain.rsaVerifierKeys) > 0 {
-		if key := jwtKeyChain.rsaVerifierKeys[keyID]; key != nil {
+	return jose.NewSigner(jose.SigningKey{
+		Key:       jwtKeyChain.signerKey,
+		Algorithm: jose.RS256,
+	}, &jose.SignerOptions{
+		ExtraHeaders: map[jose.HeaderKey]interface{}{
+			jose.HeaderKey("kid"): jwtKeyChain.signerKeyID,
+		},
+	})
+}
+
+func (jwtKeyChain JWTKeyChain) GetSignedVerifierKey(keyID string) interface{} {
+	if jwtKeyChain.signerKey != nil && jwtKeyChain.signerKeyID == keyID {
+		return jwtKeyChain.signerKey.Public()
+	}
+	if len(jwtKeyChain.keySet) > 0 {
+		if key := jwtKeyChain.keySet[keyID]; key != nil {
 			return key
 		}
 	}
 	return nil
 }
 
-func (jwtKeyChain *JWTKeyChain) LoadVerifierKeysFromJWKSetByURL(url string) (int, error) {
-	publicKeys, err := jwk.GetPublicKeysFromSetByURL(url)
+func (jwtKeyChain *JWTKeyChain) LoadVerifierKeysFromJWKSetByURL(jwksURL string) (int, error) {
+	publicKeys, err := loadJSONWebKeySetByURL(jwksURL)
 	if err != nil {
 		return 0, err
 	}
-	if len(publicKeys) > 0 && jwtKeyChain.rsaVerifierKeys == nil {
-		jwtKeyChain.rsaVerifierKeys = make(map[string]*rsa.PublicKey)
+	if len(publicKeys) > 0 && jwtKeyChain.keySet == nil {
+		jwtKeyChain.keySet = make(map[string]interface{})
 	}
 	for keyID, keyData := range publicKeys {
-		jwtKeyChain.rsaVerifierKeys[keyID] = keyData
+		jwtKeyChain.keySet[keyID] = keyData
 	}
 	return len(publicKeys), nil
 }
 
-func (jwtKeyChain JWTKeyChain) JWKSet() *jwk.Set {
-	publicKeys := make(map[string]*rsa.PublicKey)
-	if signerKey, signerKeyID := jwtKeyChain.GetSigner(); signerKey != nil && signerKeyID != "" {
+func (jwtKeyChain JWTKeyChain) JWKSet() jose.JSONWebKeySet {
+	var keys []jose.JSONWebKey
+
+	// Add active signer key
+	signerKey := jwtKeyChain.signerKey
+	signerKeyID := jwtKeyChain.signerKeyID
+	if signerKey != nil && signerKeyID != "" {
 		if rsaPrivateKey, ok := signerKey.(*rsa.PrivateKey); ok {
 			publicKey := rsaPrivateKey.PublicKey
-			publicKeys[signerKeyID] = &publicKey
+			keys = append(keys, jose.JSONWebKey{
+				KeyID:     signerKeyID,
+				Key:       &publicKey,
+				Use:       "sig",
+				Algorithm: string(jose.RS256),
+			})
 		}
 	}
-	jwks := &jwk.Set{}
-	jwks.AddRSAPublicKeys(publicKeys)
-	jwks.AddRSAPublicKeys(jwtKeyChain.rsaVerifierKeys)
-	return jwks
+
+	// Add verifier keys
+	for kid, key := range jwtKeyChain.keySet {
+		keys = append(keys, jose.JSONWebKey{
+			KeyID:     kid,
+			Key:       key,
+			Use:       "sig",
+			Algorithm: string(jose.RS256),
+		})
+	}
+
+	return jose.JSONWebKeySet{Keys: keys}
 }
 
-//TODO: use proper thumbprint alg https://tools.ietf.org/id/draft-jones-jose-jwk-thumbprint-00.html
-func fingerprintRSAPublicKey(publicKey *rsa.PublicKey) string {
-	der, _ := x509.MarshalPKIXPublicKey(publicKey)
-	idBytes := sha1.Sum(der)
-	return hex.EncodeToString(idBytes[:])
+func thumbprintKey(key interface{}) (thumbprintStr string, err error) {
+	k := &jose.JSONWebKey{Key: key}
+	tpBytes, err := k.Thumbprint(thumbprintHasher)
+	return base64.RawURLEncoding.EncodeToString(tpBytes), err
 }
 
-func fingerprintRSAPrivateKey(privateKey *rsa.PrivateKey) string {
-	return fingerprintRSAPublicKey(&privateKey.PublicKey)
+func loadJSONWebKeySetByURL(jwksURL string) (keyMap map[string]interface{}, err error) {
+	client := &http.Client{}
+
+	resp, err := client.Get(jwksURL)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("fetch failed with code %v url %v", resp.StatusCode, jwksURL)
+	}
+
+	var set jose.JSONWebKeySet
+	err = json.NewDecoder(resp.Body).Decode(&set)
+	if err != nil {
+		return nil, err
+	}
+
+	keySet := make(map[string]interface{})
+	for _, key := range set.Keys {
+		if _, ok := keySet[key.KeyID]; ok {
+			panic("multiple keys with the same ID")
+		}
+		keySet[key.KeyID] = key.Key
+	}
+	return keySet, nil
 }
 
 // see filepath.Match for the pattern
@@ -132,7 +190,10 @@ func loadRSAPublicKeysByFileNamePattern(pattern string) (map[string]*rsa.PublicK
 		if pub == nil {
 			continue
 		}
-		keyID := fingerprintRSAPublicKey(pub)
+		keyID, err := thumbprintKey(pub)
+		if err != nil {
+			panic(err)
+		}
 		publicKeys[keyID] = pub
 	}
 
