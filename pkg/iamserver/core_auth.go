@@ -4,14 +4,13 @@ import (
 	"crypto/rand"
 	"time"
 
-	oldjwt "github.com/dgrijalva/jwt-go"
 	apperrs "github.com/kadisoka/foundation/pkg/app/errors"
 	"github.com/kadisoka/foundation/pkg/errors"
 	"github.com/lib/pq"
+	"github.com/square/go-jose/v3"
 	"github.com/square/go-jose/v3/jwt"
 
 	"github.com/kadisoka/iam/pkg/iam"
-	"github.com/kadisoka/iam/pkg/jose/jws"
 )
 
 func (core *Core) GenerateAccessTokenJWT(
@@ -50,10 +49,16 @@ func (core *Core) GenerateAccessTokenJWT(
 		TerminalID:      terminalID.String(),
 	}
 
-	tokenData := oldjwt.NewWithClaims(oldjwt.SigningMethodRS256, tokenClaims)
-	tokenData.Header[jws.JOSEHeaderParameterKeyID.String()] = signerKeyID
-	tokenString, err = tokenData.SignedString(signerKey)
-	return tokenString, err
+	signer, err := jose.NewSigner(jose.SigningKey{
+		Algorithm: jose.RS256, Key: signerKey}, nil)
+	if err != nil {
+		return "", errors.Wrap("signer", err)
+	}
+	tokenString, err = jwt.Signed(signer).Claims(tokenClaims).CompactSerialize()
+	if err != nil {
+		return "", errors.Wrap("signing", err)
+	}
+	return
 }
 
 func (core *Core) GenerateRefreshTokenJWT(
@@ -78,10 +83,16 @@ func (core *Core) GenerateRefreshTokenJWT(
 		TerminalSecret: terminalSecret,
 	}
 
-	tokenData := oldjwt.NewWithClaims(oldjwt.SigningMethodRS256, tokenClaims)
-	tokenData.Header[jws.JOSEHeaderParameterKeyID.String()] = signerKeyID
-	tokenString, err = tokenData.SignedString(signerKey)
-	return tokenString, err
+	signer, err := jose.NewSigner(jose.SigningKey{
+		Algorithm: jose.RS256, Key: signerKey}, nil)
+	if err != nil {
+		return "", errors.Wrap("signer", err)
+	}
+	tokenString, err = jwt.Signed(signer).Claims(tokenClaims).CompactSerialize()
+	if err != nil {
+		return "", errors.Wrap("signing", err)
+	}
+	return
 }
 
 func (core *Core) generateAuthorizationID(

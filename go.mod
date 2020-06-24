@@ -3,8 +3,7 @@ module github.com/kadisoka/iam
 go 1.14
 
 require (
-	github.com/aws/aws-sdk-go v1.32.7
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/aws/aws-sdk-go v1.32.8
 	github.com/emicklei/go-restful v2.13.0+incompatible
 	github.com/emicklei/go-restful-openapi v1.4.0
 	github.com/go-openapi/jsonreference v0.19.3 // indirect
@@ -14,7 +13,7 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/jmoiron/sqlx v1.2.0
-	github.com/kadisoka/foundation v0.0.0-20200623154345-0128097ec7c1
+	github.com/kadisoka/foundation v0.0.0-20200624103603-85add49e0bb6
 	github.com/lib/pq v1.7.0
 	github.com/mailru/easyjson v0.7.1 // indirect
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
