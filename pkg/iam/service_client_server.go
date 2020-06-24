@@ -5,16 +5,14 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 	"github.com/kadisoka/foundation/pkg/api"
 	"github.com/kadisoka/foundation/pkg/errors"
 	dataerrs "github.com/kadisoka/foundation/pkg/errors/data"
+	"github.com/square/go-jose/v3/jwt"
 	"github.com/tomasen/realip"
 	grpcmd "google.golang.org/grpc/metadata"
 	grpcpeer "google.golang.org/grpc/peer"
-
-	"github.com/kadisoka/iam/pkg/jose/jws"
 )
 
 // ServiceClientServer is an interface which contains utilities for
@@ -59,12 +57,6 @@ func (svcClServer *ServiceClientServerCore) GetJWTVerifierKey(keyID string) inte
 	return svcClServer.jwtKeyChain.GetJWTVerifierKey(keyID)
 }
 
-//HACK: we disable claims validation until all the clients have implemented
-// token refresh.
-var jwtParser = &jwt.Parser{
-	SkipClaimsValidation: true,
-}
-
 func (svcClServer *ServiceClientServerCore) AuthorizationFromJWTString(
 	jwtStr string,
 ) (*Authorization, error) {
@@ -73,48 +65,46 @@ func (svcClServer *ServiceClientServerCore) AuthorizationFromJWTString(
 		return emptyAuthCtx, nil
 	}
 
-	token, err := jwtParser.ParseWithClaims(
-		jwtStr,
-		&AccessTokenClaims{},
-		func(inToken *jwt.Token) (interface{}, error) {
-			algVal := inToken.Header[jws.JOSEHeaderParameterAlgorithm.String()]
-			if algStr, ok := algVal.(string); !ok || algStr != "RS256" {
-				return emptyAuthCtx, ReqFieldErrMsg("alg", "unsupported")
-			}
-			kidVal := inToken.Header[jws.JOSEHeaderParameterKeyID.String()]
-			kidStr, ok := kidVal.(string)
-			if !ok || kidStr == "" {
-				return emptyAuthCtx, ReqFieldErrMsg("kid", "empty")
-			}
-			if key := svcClServer.JWTKeyChain().GetJWTVerifierKey(kidStr); key != nil {
-				return key, nil
-			}
-			return nil, ReqFieldErrMsg("kid", "reference invalid")
-		})
+	tok, err := jwt.ParseSigned(jwtStr)
 	if err != nil {
-		//TODO: translate the error
-		if errors.IsCallError(err) {
-			return emptyAuthCtx, errors.ArgWrap("jwtStr", "validation", err)
-		}
-		return emptyAuthCtx, errors.Wrap("token validation", err)
+		return emptyAuthCtx, errors.ArgWrap("", "parsing", err)
+	}
+	if len(tok.Headers) != 1 {
+		return emptyAuthCtx, errors.ArgMsg("", "invalid number of headers")
 	}
 
-	if !token.Valid {
-		//TODO: check why it's not valid (expired?)
-		return emptyAuthCtx, errors.ArgMsg("jwtStr", "token invalid")
+	keyID := tok.Headers[0].KeyID
+	if keyID == "" {
+		return emptyAuthCtx, errors.Arg("", errors.EntMsg("kid", "empty"))
 	}
 
-	// Non-safe type-assertion but if it panics, then something has gone totally wrong
-	claims := token.Claims.(*AccessTokenClaims)
-	if claims.Id == "" {
-		return emptyAuthCtx, errors.ArgMsg("jwtStr", "token contains no jti")
+	verifierKey := svcClServer.JWTKeyChain().GetJWTVerifierKey(keyID)
+	if verifierKey == nil {
+		return emptyAuthCtx, errors.Arg("", errors.EntMsg("kid", "reference invalid"))
 	}
+
+	var claims AccessTokenClaims
+	err = tok.Claims(verifierKey, &claims)
+	if err != nil {
+		return emptyAuthCtx, errors.ArgWrap("", "verification", err)
+	}
+
+	//TODO: check expiry
+
+	if claims.ID == "" {
+		return emptyAuthCtx, errors.Arg("", errors.EntMsg("jti", "empty"))
+	}
+	authID, err := AuthorizationIDFromString(claims.ID)
+	if err != nil {
+		return emptyAuthCtx, errors.Arg("", errors.Ent("jti", dataerrs.Malformed(err)))
+	}
+	//TODO(exa): check if the authorization instance id has been revoked
 
 	var userID UserID
 	if claims.Subject != "" {
 		userID, err = UserIDFromString(claims.Subject)
 		if err != nil {
-			return emptyAuthCtx, errors.ArgMsg("jwtStr", "subject identifier malformed")
+			return emptyAuthCtx, errors.Arg("", errors.EntMsg("sub", "malformed"))
 		}
 		userAccountState, err := svcClServer.userAccountStateService.
 			GetUserAccountState(userID)
@@ -122,31 +112,23 @@ func (svcClServer *ServiceClientServerCore) AuthorizationFromJWTString(
 			return emptyAuthCtx, errors.Wrap("account state query", err)
 		}
 		if userAccountState == nil {
-			return emptyAuthCtx, errors.ArgMsg("jwtStr", "subject user ID not registered")
+			return emptyAuthCtx, errors.Arg("", errors.EntMsg("sub", "reference invalid"))
 		}
 		if !userAccountState.IsAccountActive() {
-			return emptyAuthCtx, errors.ArgMsg("jwtStr", "subject account deleted")
+			return emptyAuthCtx, errors.Arg("", errors.EntMsg("sub", "reference invalid"))
 		}
 	}
+
 	var terminalID TerminalID
 	if claims.TerminalID == "" {
-		return emptyAuthCtx, errors.ArgMsg("jwtStr", "terminal ID empty")
+		return emptyAuthCtx, errors.Arg("", errors.EntMsg("terminal_id", "empty"))
 	}
 	terminalID, err = TerminalIDFromString(claims.TerminalID)
 	if err != nil {
-		return emptyAuthCtx, errors.Arg("jwtStr",
-			errors.Ent("terminal_id", dataerrs.Malformed(err)))
+		return emptyAuthCtx, errors.Arg("", errors.Ent("terminal_id", dataerrs.Malformed(err)))
 	}
 	if terminalID.IsNotValid() {
-		return emptyAuthCtx, errors.Arg("jwtStr",
-			errors.Ent("terminal_id", dataerrs.ErrMalformed))
-	}
-
-	//TODO(exa): check if the authorization instance id has been revoked
-	authID, err := AuthorizationIDFromString(claims.Id)
-	if err != nil {
-		return emptyAuthCtx, errors.Arg("jwtStr",
-			errors.Ent("id", dataerrs.Malformed(err)))
+		return emptyAuthCtx, errors.Arg("", errors.Ent("terminal_id", dataerrs.ErrMalformed))
 	}
 
 	return &Authorization{

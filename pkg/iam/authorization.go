@@ -3,9 +3,9 @@ package iam
 import (
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/kadisoka/foundation/pkg/errors"
 	dataerrs "github.com/kadisoka/foundation/pkg/errors/data"
+	"github.com/square/go-jose/v3/jwt"
 )
 
 // Used in API call metadata: HTTP header and gRPC call metadata
@@ -122,11 +122,19 @@ const (
 )
 
 type AccessTokenClaims struct {
-	jwt.StandardClaims
+	jwt.Claims
 
 	AuthorizedParty string `json:"azp,omitempty"`
 	SubType         string `json:"sub_type,omitempty"`
 	TerminalID      string `json:"terminal_id,omitempty"`
+}
+
+//TODO: unused. remove this.
+func (claims AccessTokenClaims) Valid() error {
+	if claims.ID != "" {
+		return nil
+	}
+	return errors.EntMsg("jti", "empty")
 }
 
 // RefreshTokenTTLDefault is the active duration for a refresh token.

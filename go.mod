@@ -22,6 +22,7 @@ require (
 	github.com/rez-go/crux-apis v0.0.0-20200519131450-aab8ff73963b
 	github.com/rez-go/stev v0.0.0-20200515184012-e0723a6f3c19
 	github.com/richardlehane/crock32 v1.0.1
+	github.com/square/go-jose/v3 v3.0.0-20200622023058-052237293361
 	github.com/stretchr/testify v1.6.1
 	github.com/tomasen/realip v0.0.0-20180522021738-f0c99a92ddce
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
