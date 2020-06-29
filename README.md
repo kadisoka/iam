@@ -48,6 +48,10 @@ documentation could be accessed at `http://localhost:11121/rest/apidocs/`.
 
 ### Starting the examples
 
+Each of these examples is independent, and none of them depend on
+`iam-server` mentioned above, in fact, you must stop it or any of the examples
+before you can start another because there might be port conflicts.
+
 #### Monolithic application example
 
 The monolithic application example is located in `examples/monolith`. To start
