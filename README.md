@@ -14,7 +14,7 @@ paradigm) or as a library for monolithic service applications.
   the users.
 * Online and always up-to-date REST API documentation
 * Non-desctructive database design
-* Designed as a resilient service
+* Designed to be resilient
 * Password-based user authentication. Supported algorithm: argon2
 * SMS delivery service integrations (for delivering the OTPs): Vonage (Nexmo),
   Telesign, Twilio
@@ -75,9 +75,9 @@ the identity server your projects depended on.
 
 ### Monolithic service applications
 
-If your application is relatively small in scale, like a simple online shop,
-a CMS, or a blog, you could import this module into your application to
-provide user account management for your application.
+If you are writing web service in Go and it is relatively small in scale,
+like a simple online shop, a CMS, or a blog, you could import this module
+into your application to provide user account management.
 
 Monolithic architecture is preferable if your service is relatively small as
 it's easier to maintain. If your application is getting popular, you can
