@@ -14,7 +14,7 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/kadisoka/foundation v0.0.0-20200624103603-85add49e0bb6
-	github.com/lib/pq v1.7.0
+	github.com/lib/pq v1.7.1
 	github.com/mailru/easyjson v0.7.1 // indirect
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
 	github.com/nyaruka/phonenumbers v1.0.56
