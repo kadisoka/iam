@@ -3,7 +3,7 @@ module github.com/kadisoka/iam
 go 1.14
 
 require (
-	github.com/aws/aws-sdk-go v1.32.8
+	github.com/aws/aws-sdk-go v1.33.10
 	github.com/emicklei/go-restful v2.13.0+incompatible
 	github.com/emicklei/go-restful-openapi v1.4.0
 	github.com/go-openapi/jsonreference v0.19.3 // indirect
