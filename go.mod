@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/aws/aws-sdk-go v1.33.10
-	github.com/emicklei/go-restful v2.13.0+incompatible
+	github.com/emicklei/go-restful v2.14.3+incompatible
 	github.com/emicklei/go-restful-openapi v1.4.1
 	github.com/go-openapi/spec v0.19.9
 	github.com/go-openapi/swag v0.19.9 // indirect
