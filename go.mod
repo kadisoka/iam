@@ -9,7 +9,7 @@ require (
 	github.com/go-openapi/spec v0.19.9
 	github.com/go-openapi/swag v0.19.9 // indirect
 	github.com/gogo/protobuf v1.3.1
-	github.com/google/uuid v1.1.1
+	github.com/google/uuid v1.1.2
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/kadisoka/foundation v0.0.0-20200723022932-2cb414b70a67
@@ -25,6 +25,6 @@ require (
 	github.com/tomasen/realip v0.0.0-20180522021738-f0c99a92ddce
 	golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899
 	golang.org/x/text v0.3.3
-	google.golang.org/grpc v1.30.0
+	google.golang.org/grpc v1.33.2
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
