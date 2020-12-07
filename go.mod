@@ -13,7 +13,7 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/kadisoka/foundation v0.0.0-20200723022932-2cb414b70a67
-	github.com/lib/pq v1.7.1
+	github.com/lib/pq v1.9.0
 	github.com/mailru/easyjson v0.7.1 // indirect
 	github.com/mattn/go-sqlite3 v1.14.0 // indirect
 	github.com/nyaruka/phonenumbers v1.0.56
