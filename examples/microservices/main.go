@@ -68,10 +68,11 @@ func main() {
 
 	httpRootMux := http.NewServeMux()
 	// Health check is used by load balancer and/or orchestrator
-	httpRootMux.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) {
-		log.Debug().Msg("TODO: /healthz actual health check e.g., db and other services we depended on")
-		w.Write([]byte("OK"))
-	})
+	httpRootMux.HandleFunc("/healthz",
+		func(w http.ResponseWriter, _ *http.Request) {
+			log.Debug().Msg("TODO: /healthz actual health check e.g., db and other services we depended on")
+			w.Write([]byte("OK"))
+		})
 
 	statsFilter := rest.NewStatsFilter()
 	restV1Container.Filter(statsFilter.Filter)

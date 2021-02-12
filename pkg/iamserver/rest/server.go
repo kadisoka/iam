@@ -26,9 +26,9 @@ type ServerConfig struct {
 	ServePort int    `env:"SERVE_PORT"`
 	ServePath string `env:"SERVE_PATH"`
 
-	// SwaggerUIDir provides information where the Swagger UI files are
+	// SwaggerUIAssetsDir provides information where the Swagger UI files are
 	// located. If left empty, the server won't serve the Swagger UI.
-	SwaggerUIDir string `env:"SWAGGER_UI_DIR"`
+	SwaggerUIAssetsDir string `env:"SWAGGER_UI_ASSETS_DIR"`
 
 	// V1 contains configuration for version 1 of the API service
 	V1 *ServerV1Config `env:"V1"`
@@ -106,7 +106,11 @@ func NewServer(
 	container.ServeMux = serveMux
 	container.EnableContentEncoding(true)
 	container.ServiceErrorHandler(
-		func(err restful.ServiceError, req *restful.Request, resp *restful.Response) {
+		func(
+			err restful.ServiceError,
+			req *restful.Request,
+			resp *restful.Response,
+		) {
 			logReq(req.Request).
 				Warn().Int("status_code", err.Code).Str("err_msg", err.Message).
 				Msg("Routing error")
@@ -137,10 +141,10 @@ func NewServer(
 		},
 	}))
 
-	if config.SwaggerUIDir != "" {
+	if config.SwaggerUIAssetsDir != "" {
 		serveMux.Handle(servePath+"/apidocs/",
 			http.StripPrefix(servePath+"/apidocs/",
-				http.FileServer(http.Dir(config.SwaggerUIDir))))
+				http.FileServer(http.Dir(config.SwaggerUIAssetsDir))))
 	}
 
 	srv := &Server{
@@ -149,15 +153,15 @@ func NewServer(
 	}
 
 	// Health check is used by load balancer and/or orchestrator
-	serveMux.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) {
-		log.Debug().Msg("TODO: /healthz actual health check e.g., db and other services we depended on")
-		if !srv.IsHealthy() {
-			log.Error().Msg("Service is not healthy")
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		w.Write([]byte("OK"))
-	})
+	serveMux.HandleFunc(
+		"/healthz", func(w http.ResponseWriter, _ *http.Request) {
+			if !srv.IsHealthy() {
+				log.Error().Msg("Service is not healthy")
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			w.Write([]byte("OK"))
+		})
 
 	return srv, nil
 }
