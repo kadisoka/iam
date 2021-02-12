@@ -1,7 +1,7 @@
 
 LINTER_IMAGE ?= kadisoka-linter
 TESTER_IMAGE ?= kadisoka-tester
-GOLANG_IMAGE ?= golang:1.14
+GOLANG_IMAGE ?= golang:1.15
 POSTGRES_IMAGE ?= postgres:10.7-alpine
 
 .PHONY: run fmt lint test deps-up \

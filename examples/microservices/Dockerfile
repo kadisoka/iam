@@ -1,4 +1,4 @@
-FROM golang:1.14 as builder
+FROM golang:1.15 as builder
 
 WORKDIR /workspace
 
@@ -18,7 +18,7 @@ RUN CGO_ENABLED=0 go build -o ./iam/bin/microservices \
     ./examples/microservices
 
 # Build the runtime image
-FROM alpine:3.11
+FROM alpine:3.13
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 
