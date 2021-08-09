@@ -3,7 +3,7 @@ module github.com/kadisoka/iam
 go 1.14
 
 require (
-	github.com/aws/aws-sdk-go v1.37.9
+	github.com/aws/aws-sdk-go v1.40.18
 	github.com/emicklei/go-restful v2.15.0+incompatible
 	github.com/emicklei/go-restful-openapi v1.4.1
 	github.com/go-openapi/spec v0.20.3
@@ -22,6 +22,6 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/tomasen/realip v0.0.0-20180522021738-f0c99a92ddce
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
-	golang.org/x/text v0.3.5
+	golang.org/x/text v0.3.6
 	google.golang.org/grpc v1.35.0
 )
