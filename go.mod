@@ -22,6 +22,6 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/tomasen/realip v0.0.0-20180522021738-f0c99a92ddce
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
-	golang.org/x/text v0.3.5
+	golang.org/x/text v0.3.7
 	google.golang.org/grpc v1.35.0
 )
