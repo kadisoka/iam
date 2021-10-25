@@ -14,7 +14,7 @@ require (
 	github.com/kadisoka/foundation v0.0.0-20210212065131-bd537c1bd097
 	github.com/lib/pq v1.9.0
 	github.com/mailru/easyjson v0.7.7 // indirect
-	github.com/nyaruka/phonenumbers v1.0.66
+	github.com/nyaruka/phonenumbers v1.0.73
 	github.com/rez-go/crux-apis v0.0.0-20200519131450-aab8ff73963b
 	github.com/rez-go/stev v0.0.0-20200515184012-e0723a6f3c19
 	github.com/richardlehane/crock32 v1.0.1
@@ -22,6 +22,6 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/tomasen/realip v0.0.0-20180522021738-f0c99a92ddce
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
-	golang.org/x/text v0.3.5
+	golang.org/x/text v0.3.7
 	google.golang.org/grpc v1.35.0
 )
